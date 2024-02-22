@@ -74,7 +74,15 @@ bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_plat
 #SBATCH --output=%x.%j.log
 #SBATCH --time=1:00:00
 
-docker run --rm -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.dipcall.vcf.gz -r /private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta -f /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/GIABv4.2.1.noinconsistent.hg002v1.0.1.dipcall.bed -o /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/happy_out --pass-only --no-roc --no-json --engine=vcfeval --threads=16
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
+/private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
+/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.dipcall.vcf.gz \
+-r /private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta \
+-f /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/GIABv4.2.1.noinconsistent.hg002v1.0.1.dipcall.bed \
+-o /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/happy_out \
+--pass-only --no-roc --no-json --engine=vcfeval --threads=16
 ```
 
 ### 7. Run dipcall on HG002_T2T_v1.0.1 vs HG002 hprc y2 assembly
