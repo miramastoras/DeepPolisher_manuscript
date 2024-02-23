@@ -1,5 +1,7 @@
 ## Creating a new truth set for training DeepPolisher, using only places where GIAB v4.2.1 and T2T v1.0.1 agree
 
+02/22/2024
+
 ### 1. Download HG002_T2T_v1.0.1 assemblies
 
 https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/HG002/assemblies/
@@ -55,11 +57,11 @@ time toil-wdl-runner \
     --logDebug \
     2>&1 | tee log.txt
 ```
-### Run happy on the output of step 2 against GIAB v4.2.1 VCF, in high confidence regions
+### 3. Run happy on the output of step 2 against GIAB v4.2.1 VCF, in high confidence regions
 
-Intersect dipcall bedfile with GIAB confidence regions
+Run hap.py
 ```
-bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.dipcall.bed -b /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/GIABv4.2.1.noinconsistent.hg002v1.0.1.dipcall.bed
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/happy_out
 ```
 
 ```
@@ -80,8 +82,54 @@ jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
 /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
 /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.dipcall.vcf.gz \
 -r /private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta \
--f /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/GIABv4.2.1.noinconsistent.hg002v1.0.1.dipcall.bed \
+-f /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed \
 -o /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/happy_out \
+--pass-only --no-roc --no-json --engine=vcfeval --threads=16
+```
+### 4. From hap.py output, subtract all regions with FP/FN from GIAB high confidence bed
+
+```
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy
+
+# extract FP/FN from happy vcf
+zcat happy_out.vcf.gz | grep "^#" > happy_out.FPFN.vcf
+zcat happy_out.vcf.gz | grep -v "^#" | grep :F >> happy_out.FPFN.vcf
+
+# count variants subtracted
+zcat happy_out.vcf.gz | grep -v "^#" | wc -l
+# 4828845
+
+grep -v "^#" happy_out.FPFN.vcf | wc -l
+# 32503 to be subtracted
+
+# subtract FP/FN from GIAB confidence set
+bedtools subtract -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/happy_out.FPFN.vcf > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed
+```
+
+### 5. Run happy again on the output of step 2 against GIAB v4.2.1 but with  HG002_GRCh38_T2T_platinum.bed. F1-score should be close to 1
+
+```
+#!/bin/bash
+#SBATCH --job-name=happy
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=short
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=16
+#SBATCH --output=%x.%j.log
+#SBATCH --time=1:00:00
+
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy_platinum_bed/
+
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
+/private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
+/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.dipcall.vcf.gz \
+-r /private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta \
+-f /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed \
+-o /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy_platinum_bed/happy_out \
 --pass-only --no-roc --no-json --engine=vcfeval --threads=16
 ```
 
