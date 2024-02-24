@@ -190,7 +190,7 @@ awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/
 
 ### 7. Run dipcall on HG002_T2T_v1.0.1 vs HG002 hprc y2 assembly
 
-
+Dipcall T2T Mat against HPRC y2 Mat
 
 `dipcall_inputs.json`:
 
@@ -199,13 +199,13 @@ awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/
   "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.mat.fa.fai",
   "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.mat.fa",
   "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.mat.fasta.gz",
-  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.pat.fasta.gz",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.mat.fasta.gz",
   "runDipcall.dipcall.referenceIsHS38": false,
   "dipcall.isMaleSample":true
 }
 ```
 
-Dipcall T2T against HPRC y2 Pat
+Dipcall T2T Pat against HPRC y2 Pat
 
 `dipcall_inputs.json`:
 
@@ -213,12 +213,13 @@ Dipcall T2T against HPRC y2 Pat
 {
   "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.pat.fa.fai",
   "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.pat.fa",
-  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.mat.fasta.gz",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.pat.fasta.gz",
   "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.pat.fasta.gz",
   "runDipcall.dipcall.referenceIsHS38": false,
   "dipcall.isMaleSample":true
 }
 ```
+
 toil locations:
 ```
 cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat
