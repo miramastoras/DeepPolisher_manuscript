@@ -370,3 +370,28 @@ time toil-wdl-runner \
     --logDebug \
     2>&1 | tee log.txt
 ```
+
+### 11. Run happy on the output of step 10 against GIAB v4.2.1 with HG002_GRCh38_T2T_platinum.bed as the bed file.
+
+```
+#!/bin/bash
+#SBATCH --job-name=happy
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=short
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=16
+#SBATCH --output=%x.%j.log
+#SBATCH --time=1:00:00
+
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
+/private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
+/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_HPRC_y2_platinum_GRCh38/dipcall_outfiles/HG002.y2.platinum.dipcall.vcf.gz \
+-r /private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta \
+-f /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed \
+-o /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_HPRC_y2_platinum_GRCh38/happy/happy_out \
+--pass-only --no-roc --no-json --engine=vcfeval --threads=16
+```
