@@ -105,7 +105,69 @@ grep -v "^#" happy_out.FPFN.vcf | wc -l
 # 32503 to be subtracted
 
 # subtract FP/FN from GIAB confidence set
-bedtools subtract -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/happy_out.FPFN.vcf > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed
+bedtools subtract -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/happy/happy_out.FPFN.vcf > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_concordant.bed
+```
+
+### 4. Also remove regions of low short read mappability in T2T from concordant.bed file
+
+##### Project bed file to GRCh38 and subtract from platinum.bed file
+
+Prepare paf files from dipcall output (T2T against GRCh38)
+```
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles
+tar -zxvf hg002v1.0.1.dipcall.tar.gz
+
+# remove unmapped paf records
+grep "tp:A:P" hg002v1.0.1.dipcall/hg002v1.0.1.hap1.paf > hg002v1.0.1.GRCh38.hap1.AP.paf
+grep "tp:A:P" hg002v1.0.1.dipcall/hg002v1.0.1.hap2.paf > hg002v1.0.1.GRCh38.hap2.AP.paf
+```
+Low mappability bed files shared from Nancy:https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/HG002/assemblies/annotation/mappability/element_500bpinsert_avgmq/
+```
+# merged regions that have avg MQ >=50
+/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed
+```
+
+```
+# project to pat
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+mobinasri/flagger:latest python3 \
+/home/programs/src/project_blocks_multi_thread.py \
+--threads 16 --mode 'asm2ref' \
+--paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.GRCh38.hap1.AP.paf \
+--blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projectable.GRCh38.pat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.pat.bed
+
+# project to mat
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+mobinasri/flagger:latest python3 \
+/home/programs/src/project_blocks_multi_thread.py \
+--threads 16 --mode 'asm2ref' \
+--paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.GRCh38.hap2.AP.paf \
+--blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projectable.GRCh38.mat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.mat.bed
+
+# combine, sort, merge bed files  
+cat /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.mat.bed /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.pat.bed | sort -k1,1 -k2,2n - | bedtools merge -i - > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.dip.merged.bed
+```
+
+Intersect with GIAB / T2T concordant regions to produce platinum bed
+```
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_concordant.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.dip.merged.bed | awk '{sum += $3-$2}END{print sum}'
+# 2512557760
+
+awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_concordant.bed
+# 2542201256
+
+# removing low short read mappability regions removes ~ 2% of sequence from platinum bed
+
+# create platinum bed
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_concordant.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.dip.merged.bed > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed
+
+sort -k1,1 -k2,2n /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed | bedtools merge -i - > tmp ; mv tmp /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed
 ```
 
 ### 5. Run happy again on the output of step 2 against GIAB v4.2.1 but with  HG002_GRCh38_T2T_platinum.bed. F1-score should be close to 1
@@ -175,17 +237,17 @@ Count projectable bases
 # total bases
 awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed
 
-2542201256
+2512557760
 
 # total projectable bases to pat
 awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/project_platinum_to_hprc_y2/HG002_GRCh38_T2T_platinum.projectable.y2.pat.bed
 
-2539442469
+2511549690
 
 # total projectable bases to mat
 awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/project_platinum_to_hprc_y2/HG002_GRCh38_T2T_platinum.projectable.y2.mat.bed
 
-2541655670
+2512523433
 ```
 
 ### 7. Run dipcall on HG002_T2T_v1.0.1 vs HG002 hprc y2 assembly
@@ -291,10 +353,10 @@ grep -v "^#" /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_trut
 Count `platinum.pair.vcf` (after intersecting)
 ```
 grep -v "^#" /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_dipcall_platinum_projected/hg002v1.0.1.pat.dipcall.HPRC_y2_pat.platinum.pair.vcf | wc -l
-# 6664
+# 6584
 
 grep -v "^#" /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_dipcall_platinum_projected/hg002v1.0.1.mat.dipcall.HPRC_y2_mat.platinum.pair.vcf | wc -l
-# 7447
+# 7292
 ```
 
 ### 9. Apply intersected outputs of step 7 to hg002_hprc_y2 assemblies
@@ -315,7 +377,7 @@ Apply edits to pat
 bcftools consensus --sample hg002v1.0.1.copy.dipcall/hg002v1.0.1.copy.hap1.bam -f /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.pat.fa -H 2 /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_dipcall_platinum_projected/hg002v1.0.1.pat.dipcall.HPRC_y2_pat.platinum.pair.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/hg002_hprc_y2_projected_platinum/HG002.y2.pat.platinum.fa
 # The site h1tg000001l:60405239 overlaps with another variant, skipping...
 # The site h1tg000025l:2040254 overlaps with another variant, skipping...
-# Applied 6662 variants
+# Applied 6582 variants
 
 ```
 Apply edits to mat
@@ -324,7 +386,7 @@ Apply edits to mat
 bcftools consensus --sample hg002v1.0.1.copy.dipcall/hg002v1.0.1.copy.hap1.bam -f /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.mat.fa -H 2 /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_dipcall_platinum_projected/hg002v1.0.1.mat.dipcall.HPRC_y2_mat.platinum.pair.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/hg002_hprc_y2_projected_platinum/HG002.y2.mat.platinum.fa
 
 # The site h2tg000022l:16474026 overlaps with another variant, skipping...
-# Applied 7446 variants
+# Applied 7291 variants
 ```
 ### 10. Run dipcall on hg002_hprc_y2_projected_platinum vs GRCh38
 
@@ -396,58 +458,3 @@ jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
 --pass-only --no-roc --no-json --engine=vcfeval --threads=16
 ```
 Results: [Rows 6-7](https://docs.google.com/spreadsheets/d/1V4aKo-NwwafFELxX0-LcCRxG9hmJ03t3jmxiLfdmEbU/edit#gid=0)
-
-### 12. Testing excluding regions of low short read mappability from T2T v1.0.1 - how much does this remove from platinum.bed?
-
-##### Method 1: Project bed file to GRCh38 and subtract from platinum.bed file
-
-Prepare paf files from dipcall output (T2T against GRCh38)
-```
-cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles
-tar -zxvf hg002v1.0.1.dipcall.tar.gz
-
-# remove unmapped paf records
-grep "tp:A:P" hg002v1.0.1.dipcall/hg002v1.0.1.hap1.paf > hg002v1.0.1.GRCh38.hap1.AP.paf
-grep "tp:A:P" hg002v1.0.1.dipcall/hg002v1.0.1.hap2.paf > hg002v1.0.1.GRCh38.hap2.AP.paf
-```
-Low mappability bed files shared from Nancy:https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/HG002/assemblies/annotation/mappability/element_500bpinsert_avgmq/
-```
-# merged regions that have avg MQ >=50
-/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed
-```
-
-```
-# project to pat
-docker run --rm -u `id -u`:`id -g` \
--v /private/groups:/private/groups \
-mobinasri/flagger:latest python3 \
-/home/programs/src/project_blocks_multi_thread.py \
---threads 16 --mode 'asm2ref' \
---paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.GRCh38.hap1.AP.paf \
---blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
---outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projectable.GRCh38.pat.bed \
---outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.pat.bed
-
-# project to mat
-docker run --rm -u `id -u`:`id -g` \
--v /private/groups:/private/groups \
-mobinasri/flagger:latest python3 \
-/home/programs/src/project_blocks_multi_thread.py \
---threads 16 --mode 'asm2ref' \
---paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.GRCh38.hap2.AP.paf \
---blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
---outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projectable.GRCh38.mat.bed \
---outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.mat.bed
-
-# combine, sort, merge bed files  
-cat /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.mat.bed /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.pat.bed | sort -k1,1 -k2,2n - | bedtools merge -i - > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.dip.merged.bed
-```
-
-Intersect with platinum bed
-```
-bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.dip.merged.bed | awk '{sum += $3-$2}END{print sum}'
-# 2512557760
-
-awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed
-# 2542201256
-```
