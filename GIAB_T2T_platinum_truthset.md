@@ -396,3 +396,58 @@ jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
 --pass-only --no-roc --no-json --engine=vcfeval --threads=16
 ```
 Results: [Rows 6-7](https://docs.google.com/spreadsheets/d/1V4aKo-NwwafFELxX0-LcCRxG9hmJ03t3jmxiLfdmEbU/edit#gid=0)
+
+### 12. Testing excluding regions of low short read mappability from T2T v1.0.1 - how much does this remove from platinum.bed?
+
+##### Method 1: Project bed file to GRCh38 and subtract from platinum.bed file
+
+Prepare paf files from dipcall output (T2T against GRCh38)
+```
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles
+tar -zxvf hg002v1.0.1.dipcall.tar.gz
+
+# remove unmapped paf records
+grep "tp:A:P" hg002v1.0.1.dipcall/hg002v1.0.1.hap1.paf > hg002v1.0.1.GRCh38.hap1.AP.paf
+grep "tp:A:P" hg002v1.0.1.dipcall/hg002v1.0.1.hap2.paf > hg002v1.0.1.GRCh38.hap2.AP.paf
+```
+Low mappability bed files shared from Nancy:https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/HG002/assemblies/annotation/mappability/element_500bpinsert_avgmq/
+```
+# merged regions that have avg MQ >=50
+/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed
+```
+
+```
+# project to pat
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+mobinasri/flagger:latest python3 \
+/home/programs/src/project_blocks_multi_thread.py \
+--threads 16 --mode 'asm2ref' \
+--paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.GRCh38.hap1.AP.paf \
+--blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projectable.GRCh38.pat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.pat.bed
+
+# project to mat
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+mobinasri/flagger:latest python3 \
+/home/programs/src/project_blocks_multi_thread.py \
+--threads 16 --mode 'asm2ref' \
+--paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.GRCh38.hap2.AP.paf \
+--blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projectable.GRCh38.mat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.mat.bed
+
+# combine, sort, merge bed files  
+cat /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.mat.bed /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.pat.bed | sort -k1,1 -k2,2n - | bedtools merge -i - > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.dip.merged.bed
+```
+
+Intersect with platinum bed
+```
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/low_mapq_short_read_T2T/hg002v1.0.1.ge50_mapq.projection.GRCh38.dip.merged.bed | awk '{sum += $3-$2}END{print sum}'
+# 2512557760
+
+awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_platinum.bed
+# 2542201256
+```
