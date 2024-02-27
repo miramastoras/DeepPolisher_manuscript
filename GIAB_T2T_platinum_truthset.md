@@ -395,3 +395,4 @@ jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
 -o /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_HPRC_y2_platinum_GRCh38/happy/happy_out \
 --pass-only --no-roc --no-json --engine=vcfeval --threads=16
 ```
+Results: [Rows 6-7](https://docs.google.com/spreadsheets/d/1V4aKo-NwwafFELxX0-LcCRxG9hmJ03t3jmxiLfdmEbU/edit#gid=0)
