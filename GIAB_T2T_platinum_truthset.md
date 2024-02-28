@@ -458,3 +458,65 @@ jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
 --pass-only --no-roc --no-json --engine=vcfeval --threads=16
 ```
 Results: [Rows 6-7](https://docs.google.com/spreadsheets/d/1V4aKo-NwwafFELxX0-LcCRxG9hmJ03t3jmxiLfdmEbU/edit#gid=0)
+
+
+## Creating another truth set for training DeepPolisher, this time using just T2T v1.0.1 in regions of good short read mappability
+
+
+### 1. Dipcall T2T v1.0.1 against HPRC y2 assembly
+
+[See step 7 above](https://github.com/miramastoras/DeepPolisher_project/blob/main/GIAB_T2T_platinum_truthset.md#7-run-dipcall-on-hg002_t2t_v101-vs-hg002-hprc-y2-assembly)
+
+```
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat
+
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat
+```
+
+### 2. Project T2T v1.0.1 high short read mappability bed to HPRC y2
+
+Prepare paf files
+```
+# remove unmapped paf records
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat/dipcall_outfiles
+gunzip -c hg002v1.0.1.copy.dipcall/hg002v1.0.1.copy.hap2.paf.gz | grep "tp:A:P" > hg002v1.0.1.dipcall.HPRC_y2_mat.AP.paf
+
+# remove unmapped paf records
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat/dipcall_outfiles
+gunzip -c hg002v1.0.1.copy.dipcall/hg002v1.0.1.copy.hap1.paf.gz | grep "tp:A:P" > hg002v1.0.1.dipcall.HPRC_y2_pat.AP.paf
+
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth
+```
+
+```
+# project to mat
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+mobinasri/flagger:latest python3 \
+/home/programs/src/project_blocks_multi_thread.py \
+--threads 16 --mode 'asm2ref' \
+--paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat/dipcall_outfiles/hg002v1.0.1.dipcall.HPRC_y2_mat.AP.paf \
+--blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth/hg002v1.0.1.avgmq.ge50.projectable.y2.mat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth/hg002v1.0.1.avgmq.ge50.projection.y2.mat.bed
+
+# project to pat
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+mobinasri/flagger:latest python3 \
+/home/programs/src/project_blocks_multi_thread.py \
+--threads 16 --mode 'asm2ref' \
+--paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat/dipcall_outfiles/hg002v1.0.1.dipcall.HPRC_y2_pat.AP.paf \
+--blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth/hg002v1.0.1.avgmq.ge50.projectable.y2.pat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth/hg002v1.0.1.avgmq.ge50.projection.y2.pat.bed
+```
+### 3. Intersect projected good mappability bed with dipcall bed
+
+```
+
+```
+
+### 4. Intersect dipcall vcfs with bed file
+
+### 5. Apply intersected outputs of step 4 with HG002_hprc_y2 assemblies 
