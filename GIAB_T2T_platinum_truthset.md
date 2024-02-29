@@ -540,7 +540,7 @@ mobinasri/flagger:latest python3 \
 --outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/mergedQ100errorexclusions.projectable.y2.pat.bed \
 --outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/mergedQ100errorexclusions.projection.y2.pat.bed
 ```
-### 4. Exclude errors from good mappability bed to create "error free" T2T HG002 v1.0.1 bed
+### 4. Exclude errors from high short read mappability bed to create an "error free" T2T HG002 v1.0.1 bed
 
 ```
 mkdir -p /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free
@@ -601,7 +601,7 @@ grep -v "^#"  /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_tru
 # 20605
 ```
 
-### 6. Apply intersected outputs of step 4 with HG002_hprc_y2 assemblies
+### 6. Apply intersected outputs of step 5 with HG002_hprc_y2 assemblies
 Prepare files
 ```
 
