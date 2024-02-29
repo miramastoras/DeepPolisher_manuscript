@@ -460,7 +460,10 @@ jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
 Results: [Rows 6-7](https://docs.google.com/spreadsheets/d/1V4aKo-NwwafFELxX0-LcCRxG9hmJ03t3jmxiLfdmEbU/edit#gid=0)
 
 
-## Creating another truth set for training DeepPolisher, this time using just T2T v1.0.1 in regions of good short read mappability
+## Creating another truth set for training DeepPolisher, just using T2T v1.0.1
+
+- subtracting regions of low short read mappability
+- subtracting regions identified by Justin Zook as errors
 
 
 ### 1. Dipcall T2T v1.0.1 against HPRC y2 assembly
@@ -485,7 +488,7 @@ gunzip -c hg002v1.0.1.copy.dipcall/hg002v1.0.1.copy.hap2.paf.gz | grep "tp:A:P" 
 cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat/dipcall_outfiles
 gunzip -c hg002v1.0.1.copy.dipcall/hg002v1.0.1.copy.hap1.paf.gz | grep "tp:A:P" > hg002v1.0.1.dipcall.HPRC_y2_pat.AP.paf
 
-mkdir -p /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth
 ```
 
 ```
@@ -497,8 +500,8 @@ mobinasri/flagger:latest python3 \
 --threads 16 --mode 'asm2ref' \
 --paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat/dipcall_outfiles/hg002v1.0.1.dipcall.HPRC_y2_mat.AP.paf \
 --blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
---outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth/hg002v1.0.1.avgmq.ge50.projectable.y2.mat.bed \
---outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth/hg002v1.0.1.avgmq.ge50.projection.y2.mat.bed
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/hg002v1.0.1.avgmq.ge50.projectable.y2.mat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/hg002v1.0.1.avgmq.ge50.projection.y2.mat.bed
 
 # project to pat
 docker run --rm -u `id -u`:`id -g` \
@@ -508,15 +511,120 @@ mobinasri/flagger:latest python3 \
 --threads 16 --mode 'asm2ref' \
 --paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat/dipcall_outfiles/hg002v1.0.1.dipcall.HPRC_y2_pat.AP.paf \
 --blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/hg002v1.0.1.window10k.avgmq.ge50.merge.bed \
---outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth/hg002v1.0.1.avgmq.ge50.projectable.y2.pat.bed \
---outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_truth/hg002v1.0.1.avgmq.ge50.projection.y2.pat.bed
-```
-### 3. Intersect projected good mappability bed with dipcall bed
-
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/hg002v1.0.1.avgmq.ge50.projectable.y2.pat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/hg002v1.0.1.avgmq.ge50.projection.y2.pat.bed
 ```
 
+### 3. Project draft error / mosaic bed file from Justin Zook to HPRC Y2  
+
+```
+# project to mat
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+mobinasri/flagger:latest python3 \
+/home/programs/src/project_blocks_multi_thread.py \
+--threads 16 --mode 'asm2ref' \
+--paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat/dipcall_outfiles/hg002v1.0.1.dipcall.HPRC_y2_mat.AP.paf \
+--blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/mergedQ100errorexclusions.bed \
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/mergedQ100errorexclusions.projectable.y2.mat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/mergedQ100errorexclusions.projection.y2.mat.bed
+
+# project to pat
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+mobinasri/flagger:latest python3 \
+/home/programs/src/project_blocks_multi_thread.py \
+--threads 16 --mode 'asm2ref' \
+--paf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat/dipcall_outfiles/hg002v1.0.1.dipcall.HPRC_y2_pat.AP.paf \
+--blocks /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/data/mergedQ100errorexclusions.bed \
+--outputProjectable /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/mergedQ100errorexclusions.projectable.y2.pat.bed \
+--outputProjection /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/mergedQ100errorexclusions.projection.y2.pat.bed
+```
+### 4. Exclude errors from good mappability bed to create "error free" T2T HG002 v1.0.1 bed
+
+```
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free
 ```
 
-### 4. Intersect dipcall vcfs with bed file
+```
+bedtools subtract -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/hg002v1.0.1.avgmq.ge50.projection.y2.pat.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/mergedQ100errorexclusions.projection.y2.pat.bed > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002_v1.0.1.error_free.y2_projection.pat.bed
 
-### 5. Apply intersected outputs of step 4 with HG002_hprc_y2 assemblies 
+bedtools subtract -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/hg002v1.0.1.avgmq.ge50.projection.y2.mat.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/mergedQ100errorexclusions.projection.y2.mat.bed > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002_v1.0.1.error_free.y2_projection.mat.bed
+```
+
+```
+# count bases in good mappability bed
+awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/hg002v1.0.1.avgmq.ge50.projection.y2.pat.bed
+ # 2640498608
+
+# count bases in "error free" bed
+awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002_v1.0.1.error_free.y2_projection.pat.bed
+# 2640063871
+
+# count bases in good mappability bed
+awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/hg002v1.0.1.avgmq.ge50.projection.y2.mat.bed
+ # 2765596752
+
+# count bases in "error free" bed
+awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002_v1.0.1.error_free.y2_projection.mat.bed
+# 2765193422
+```
+### 5. Intersect dipcall vcfs with "error free" bed file
+
+Intersect
+```
+grep "^#" /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat/dipcall_outfiles/hg002v1.0.1.mat.pair.vcf > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.mat.HPRC_y2.pair.vcf
+
+# mat to mat
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat/dipcall_outfiles/hg002v1.0.1.mat.pair.vcf -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002_v1.0.1.error_free.y2_projection.mat.bed >> /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.mat.HPRC_y2.pair.vcf
+
+# get header
+grep "^#" /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat/dipcall_outfiles/hg002v1.0.1.pat.pair.vcf > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.pat.HPRC_y2.pair.vcf
+
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat/dipcall_outfiles/hg002v1.0.1.pat.pair.vcf -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002_v1.0.1.error_free.y2_projection.pat.bed >> /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.pat.HPRC_y2.pair.vcf
+```
+
+Count `pair.vcf` variants before intersect
+```
+grep -v "^#" /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_pat/dipcall_outfiles/hg002v1.0.1.pat.pair.vcf | wc -l
+# 44548
+
+grep -v "^#" /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_HPRC_y2_mat/dipcall_outfiles/hg002v1.0.1.mat.pair.vcf | wc -l
+# 39345
+```
+Count `error_free*.pair.vcf` (after intersecting)
+```
+grep -v "^#" /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.pat.HPRC_y2.pair.vcf | wc -l
+# 19178
+
+grep -v "^#"  /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.mat.HPRC_y2.pair.vcf | wc -l
+# 20605
+```
+
+### 6. Apply intersected outputs of step 4 with HG002_hprc_y2 assemblies
+Prepare files
+```
+
+bgzip /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.mat.HPRC_y2.pair.vcf
+tabix -p vcf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.mat.HPRC_y2.pair.vcf.gz
+
+bgzip /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.pat.HPRC_y2.pair.vcf
+tabix -p vcf /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.pat.HPRC_y2.pair.vcf.gz
+```
+Apply edits to pat
+```
+# apply vcf edits to pat assembly
+bcftools consensus --sample hg002v1.0.1.copy.dipcall/hg002v1.0.1.copy.hap1.bam -f /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.pat.fa -H 2 /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.pat.HPRC_y2.pair.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/HG002.y2.pat.T2Tv1.0.1_error_free.fa
+
+# Applied 19178 variants
+
+```
+Apply edits to mat
+```
+# apply vcf edits to mat assembly
+bcftools consensus --sample hg002v1.0.1.copy.dipcall/hg002v1.0.1.copy.hap1.bam -f /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.mat.fa -H 2 /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/T2T_HG002v1.0.1.error_free.mat.HPRC_y2.pair.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/T2T_v1.0.1_good_mapq_excl_errors_mosaic_truth/T2T_HG002v1.0.1_error_free/HG002.y2.mat.T2Tv1.0.1_error_free.fa
+
+
+# The site h2tg000020l:61022006 overlaps with another variant, skipping...
+# Applied 20604 variants
+```
