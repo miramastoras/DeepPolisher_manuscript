@@ -1,0 +1,378 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##FILTER=<ID=refCall,Description="Call is homozygous">
+##FILTER=<ID=lowGQ,Description="Low genotype quality">
+##FILTER=<ID=lowQUAL,Description="Low variant call quality">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Float,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Depth">
+##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Allele depth">
+##FORMAT=<ID=VAF,Number=A,Type=Float,Description="Variant allele fractions.">
+##contig=<ID=h1tg000001l,length=93170934>
+##contig=<ID=h1tg000002l,length=161164712>
+##contig=<ID=h1tg000003l,length=2399325>
+##contig=<ID=h1tg000004l,length=90170267>
+##contig=<ID=h1tg000005l,length=190833397>
+##contig=<ID=h1tg000006l,length=242107585>
+##contig=<ID=h1tg000007l,length=146769078>
+##contig=<ID=h1tg000008l,length=134689429>
+##contig=<ID=h1tg000009l,length=45493004>
+##contig=<ID=h1tg000010l,length=80018618>
+##contig=<ID=h1tg000011l,length=61415043>
+##contig=<ID=h1tg000012l,length=133305598>
+##contig=<ID=h1tg000013l,length=137239670>
+##contig=<ID=h1tg000014l,length=109266308>
+##contig=<ID=h1tg000015l,length=62815798>
+##contig=<ID=h1tg000016l,length=111364110>
+##contig=<ID=h1tg000017l,length=104597808>
+##contig=<ID=h1tg000018l,length=201955121>
+##contig=<ID=h1tg000019l,length=29322978>
+##contig=<ID=h1tg000020l,length=129602372>
+##contig=<ID=h1tg000021l,length=139986213>
+##contig=<ID=h1tg000022l,length=2996170>
+##contig=<ID=h1tg000023l,length=67965398>
+##contig=<ID=h1tg000024l,length=844801>
+##contig=<ID=h1tg000025l,length=134586730>
+##contig=<ID=h1tg000026l,length=123420>
+##contig=<ID=h1tg000027l,length=96005315>
+##contig=<ID=h1tg000028l,length=11540746>
+##contig=<ID=h1tg000029l,length=59095704>
+##contig=<ID=h1tg000030l,length=49505718>
+##contig=<ID=h1tg000031l,length=24800483>
+##contig=<ID=h1tg000032l,length=10404749>
+##contig=<ID=h1tg000033l,length=3359290>
+##contig=<ID=h1tg000034l,length=11120301>
+##contig=<ID=h1tg000035l,length=968508>
+##contig=<ID=h1tg000036l,length=23311>
+##contig=<ID=h1tg000037l,length=3176396>
+##contig=<ID=h1tg000038l,length=4229412>
+##contig=<ID=h1tg000039l,length=356204>
+##contig=<ID=h1tg000040l,length=1297092>
+##contig=<ID=h1tg000041l,length=174209>
+##contig=<ID=h1tg000042l,length=1846517>
+##contig=<ID=h1tg000043l,length=3113316>
+##contig=<ID=h1tg000044l,length=2050901>
+##contig=<ID=h1tg000045l,length=246236>
+##contig=<ID=h1tg000046l,length=4413527>
+##contig=<ID=h1tg000047l,length=184447>
+##contig=<ID=h1tg000048l,length=192834>
+##contig=<ID=h1tg000049l,length=329884>
+##contig=<ID=h1tg000050l,length=1335594>
+##contig=<ID=h1tg000051l,length=35404350>
+##contig=<ID=h1tg000052l,length=225456>
+##contig=<ID=h1tg000053l,length=914774>
+##contig=<ID=h1tg000054l,length=38280>
+##contig=<ID=h1tg000055l,length=83138>
+##contig=<ID=h1tg000056l,length=267013>
+##contig=<ID=h1tg000057l,length=101097>
+##contig=<ID=h1tg000058l,length=76820>
+##contig=<ID=h1tg000059l,length=212076>
+##contig=<ID=h1tg000060l,length=243330>
+##contig=<ID=h1tg000061l,length=449781>
+##contig=<ID=h1tg000062l,length=72368>
+##contig=<ID=h1tg000063l,length=175883>
+##contig=<ID=h1tg000064l,length=62628>
+##contig=<ID=h1tg000065l,length=63657>
+##contig=<ID=h1tg000066l,length=890299>
+##contig=<ID=h1tg000067l,length=72169>
+##contig=<ID=h1tg000068l,length=68277>
+##contig=<ID=h1tg000069l,length=104715>
+##contig=<ID=h1tg000070l,length=38932>
+##contig=<ID=h1tg000071l,length=61792>
+##contig=<ID=h1tg000072l,length=43614>
+##contig=<ID=h1tg000073l,length=56680>
+##contig=<ID=h1tg000074l,length=222572>
+##contig=<ID=h1tg000075l,length=65542>
+##contig=<ID=h1tg000076l,length=139406>
+##contig=<ID=h1tg000077l,length=52265>
+##contig=<ID=h1tg000078l,length=360526>
+##contig=<ID=h1tg000079l,length=93303>
+##contig=<ID=h1tg000080l,length=29368>
+##contig=<ID=h1tg000081l,length=106206>
+##contig=<ID=h1tg000082l,length=40117>
+##contig=<ID=h1tg000083l,length=119476>
+##contig=<ID=h1tg000084l,length=43669>
+##contig=<ID=h1tg000085l,length=73625>
+##contig=<ID=h1tg000086l,length=231269>
+##contig=<ID=h1tg000087l,length=91341>
+##contig=<ID=h1tg000088l,length=34798>
+##contig=<ID=h1tg000089l,length=71469>
+##contig=<ID=h1tg000090l,length=34921>
+##contig=<ID=h1tg000091l,length=155407>
+##contig=<ID=h1tg000092l,length=53693>
+##contig=<ID=h1tg000093l,length=27665>
+##contig=<ID=h1tg000094l,length=50036>
+##contig=<ID=h1tg000095l,length=106864>
+##contig=<ID=h1tg000096l,length=79015>
+##contig=<ID=h1tg000097l,length=43672>
+##contig=<ID=h1tg000098l,length=46398>
+##contig=<ID=h1tg000099l,length=65533>
+##contig=<ID=h1tg000100l,length=60229>
+##contig=<ID=h1tg000101l,length=136228>
+##contig=<ID=h1tg000102l,length=149937>
+##contig=<ID=h1tg000103l,length=51723>
+##contig=<ID=h1tg000104l,length=69271>
+##contig=<ID=h1tg000105l,length=51894>
+##contig=<ID=h1tg000106l,length=43663>
+##contig=<ID=h1tg000107l,length=67887>
+##contig=<ID=h1tg000108l,length=41967>
+##contig=<ID=h1tg000109l,length=174124>
+##contig=<ID=h1tg000110l,length=34166>
+##contig=<ID=h1tg000111l,length=30923>
+##contig=<ID=h1tg000112l,length=151185>
+##contig=<ID=h1tg000113l,length=110878>
+##contig=<ID=h1tg000114l,length=57649>
+##contig=<ID=h1tg000115l,length=69954>
+##contig=<ID=h1tg000116l,length=215831>
+##contig=<ID=h1tg000117l,length=115581>
+##contig=<ID=h1tg000118l,length=46892>
+##contig=<ID=h1tg000119l,length=30646>
+##contig=<ID=h1tg000120l,length=34978>
+##contig=<ID=h1tg000121l,length=44967>
+##contig=<ID=h1tg000122l,length=30043>
+##contig=<ID=h1tg000123l,length=30539>
+##contig=<ID=h1tg000124l,length=40598>
+##contig=<ID=h1tg000125l,length=65813>
+##contig=<ID=h1tg000126l,length=40738>
+##contig=<ID=h1tg000127l,length=126864>
+##contig=<ID=h1tg000128l,length=60227>
+##contig=<ID=h1tg000129l,length=46362>
+##contig=<ID=h1tg000130l,length=63579>
+##contig=<ID=h1tg000131l,length=35157>
+##contig=<ID=h1tg000132l,length=90479>
+##contig=<ID=h1tg000133l,length=58800>
+##contig=<ID=h1tg000134l,length=52294>
+##contig=<ID=h1tg000135l,length=23480>
+##contig=<ID=h1tg000136l,length=20275>
+##contig=<ID=h1tg000137l,length=24832>
+##contig=<ID=h1tg000138l,length=25975>
+##contig=<ID=h1tg000139l,length=31655>
+##contig=<ID=h1tg000140l,length=37739>
+##contig=<ID=h1tg000141l,length=34821>
+##contig=<ID=h1tg000142l,length=32321>
+##contig=<ID=h1tg000143l,length=20637>
+##contig=<ID=h1tg000144l,length=33116>
+##contig=<ID=h1tg000145l,length=65130>
+##contig=<ID=h1tg000146l,length=30341>
+##contig=<ID=h1tg000147l,length=31481>
+##contig=<ID=h1tg000148l,length=39960>
+##contig=<ID=h1tg000149l,length=47635>
+##contig=<ID=h1tg000150l,length=63215>
+##contig=<ID=h1tg000151l,length=32242>
+##contig=<ID=h1tg000152l,length=34935>
+##contig=<ID=h1tg000153l,length=27495>
+##contig=<ID=h1tg000154l,length=36121>
+##contig=<ID=h1tg000155l,length=32925>
+##contig=<ID=h1tg000156l,length=26397>
+##contig=<ID=h1tg000157l,length=33476>
+##contig=<ID=h1tg000158l,length=34890>
+##contig=<ID=h1tg000159l,length=23641>
+##contig=<ID=h1tg000160l,length=46428>
+##contig=<ID=h1tg000161l,length=23061>
+##contig=<ID=h1tg000162l,length=24674>
+##contig=<ID=h1tg000163l,length=13545>
+##contig=<ID=h1tg000164l,length=37254>
+##contig=<ID=h1tg000165l,length=35471>
+##contig=<ID=h1tg000166l,length=42119>
+##contig=<ID=h1tg000167l,length=32286>
+##contig=<ID=h1tg000168l,length=29137>
+##contig=<ID=h1tg000169l,length=14864>
+##contig=<ID=h1tg000170l,length=23290>
+##contig=<ID=h1tg000171l,length=16267>
+##contig=<ID=h1tg000172l,length=24292>
+##contig=<ID=h1tg000173l,length=13496>
+##contig=<ID=h1tg000174l,length=30241>
+##contig=<ID=h1tg000175l,length=16829>
+##contig=<ID=h1tg000176l,length=29229>
+##contig=<ID=h1tg000177l,length=32140>
+##contig=<ID=h1tg000178l,length=23377>
+##contig=<ID=h1tg000179l,length=26157>
+##contig=<ID=h1tg000180l,length=30656>
+##contig=<ID=h1tg000181l,length=28215>
+##contig=<ID=h1tg000182l,length=12501>
+##contig=<ID=h1tg000183l,length=36851>
+##contig=<ID=h1tg000184l,length=36851>
+##contig=<ID=h1tg000185l,length=36851>
+##contig=<ID=h1tg000186l,length=36851>
+##contig=<ID=h2tg000001l,length=135357377>
+##contig=<ID=h2tg000002l,length=98982797>
+##contig=<ID=h2tg000003l,length=191435195>
+##contig=<ID=h2tg000004l,length=163399613>
+##contig=<ID=h2tg000005l,length=138188457>
+##contig=<ID=h2tg000006l,length=62108336>
+##contig=<ID=h2tg000007l,length=240932996>
+##contig=<ID=h2tg000008l,length=200574960>
+##contig=<ID=h2tg000009l,length=132042695>
+##contig=<ID=h2tg000010l,length=60157775>
+##contig=<ID=h2tg000011l,length=255311810>
+##contig=<ID=h2tg000012l,length=6179588>
+##contig=<ID=h2tg000013l,length=44328407>
+##contig=<ID=h2tg000014l,length=40605418>
+##contig=<ID=h2tg000015l,length=146029305>
+##contig=<ID=h2tg000016l,length=135955284>
+##contig=<ID=h2tg000017l,length=92597640>
+##contig=<ID=h2tg000018l,length=112305064>
+##contig=<ID=h2tg000019l,length=48990677>
+##contig=<ID=h2tg000020l,length=67029234>
+##contig=<ID=h2tg000021l,length=101869237>
+##contig=<ID=h2tg000022l,length=133831629>
+##contig=<ID=h2tg000023l,length=3419613>
+##contig=<ID=h2tg000024l,length=90727968>
+##contig=<ID=h2tg000025l,length=80028099>
+##contig=<ID=h2tg000026l,length=23622582>
+##contig=<ID=h2tg000027l,length=58121764>
+##contig=<ID=h2tg000028l,length=350054>
+##contig=<ID=h2tg000029l,length=134957952>
+##contig=<ID=h2tg000030l,length=25200227>
+##contig=<ID=h2tg000031l,length=3390742>
+##contig=<ID=h2tg000032l,length=3536396>
+##contig=<ID=h2tg000033l,length=4294762>
+##contig=<ID=h2tg000034l,length=5266220>
+##contig=<ID=h2tg000035l,length=2783907>
+##contig=<ID=h2tg000036l,length=207091>
+##contig=<ID=h2tg000037l,length=1297092>
+##contig=<ID=h2tg000038l,length=174209>
+##contig=<ID=h2tg000039l,length=28000>
+##contig=<ID=h2tg000040l,length=81421>
+##contig=<ID=h2tg000041l,length=286747>
+##contig=<ID=h2tg000042l,length=454168>
+##contig=<ID=h2tg000043l,length=240205>
+##contig=<ID=h2tg000044l,length=16569>
+##contig=<ID=h2tg000045l,length=193586>
+##contig=<ID=h2tg000046l,length=2599035>
+##contig=<ID=h2tg000047l,length=447444>
+##contig=<ID=h2tg000048l,length=47146>
+##contig=<ID=h2tg000049l,length=315919>
+##contig=<ID=h2tg000050l,length=80437>
+##contig=<ID=h2tg000051l,length=838309>
+##contig=<ID=h2tg000052l,length=242100>
+##contig=<ID=h2tg000053l,length=136562>
+##contig=<ID=h2tg000054l,length=336606>
+##contig=<ID=h2tg000055l,length=271738>
+##contig=<ID=h2tg000056l,length=183045>
+##contig=<ID=h2tg000057l,length=124413>
+##contig=<ID=h2tg000058l,length=343573>
+##contig=<ID=h2tg000059l,length=234816>
+##contig=<ID=h2tg000060l,length=122546>
+##contig=<ID=h2tg000061l,length=132610>
+##contig=<ID=h2tg000062l,length=1039938>
+##contig=<ID=h2tg000063l,length=78127>
+##contig=<ID=h2tg000064l,length=30773>
+##contig=<ID=h2tg000065l,length=37701>
+##contig=<ID=h2tg000066l,length=50409>
+##contig=<ID=h2tg000067l,length=104139>
+##contig=<ID=h2tg000068l,length=59951>
+##contig=<ID=h2tg000069l,length=26435>
+##contig=<ID=h2tg000070l,length=198280>
+##contig=<ID=h2tg000071l,length=109804>
+##contig=<ID=h2tg000072l,length=107599>
+##contig=<ID=h2tg000073l,length=60584>
+##contig=<ID=h2tg000074l,length=198193>
+##contig=<ID=h2tg000075l,length=121757>
+##contig=<ID=h2tg000076l,length=72913>
+##contig=<ID=h2tg000077l,length=243673>
+##contig=<ID=h2tg000078l,length=106674>
+##contig=<ID=h2tg000079l,length=37650>
+##contig=<ID=h2tg000080l,length=105253>
+##contig=<ID=h2tg000081l,length=151970>
+##contig=<ID=h2tg000082l,length=329448>
+##contig=<ID=h2tg000083l,length=116845>
+##contig=<ID=h2tg000084l,length=48856>
+##contig=<ID=h2tg000085l,length=140582>
+##contig=<ID=h2tg000086l,length=171365>
+##contig=<ID=h2tg000087l,length=154466>
+##contig=<ID=h2tg000088l,length=39970>
+##contig=<ID=h2tg000089l,length=80153>
+##contig=<ID=h2tg000090l,length=43000>
+##contig=<ID=h2tg000091l,length=92477>
+##contig=<ID=h2tg000092l,length=23559>
+##contig=<ID=h2tg000093l,length=28381>
+##contig=<ID=h2tg000094l,length=59181>
+##contig=<ID=h2tg000095l,length=52118>
+##contig=<ID=h2tg000096l,length=62965>
+##contig=<ID=h2tg000097l,length=47500>
+##contig=<ID=h2tg000098l,length=46329>
+##contig=<ID=h2tg000099l,length=61268>
+##contig=<ID=h2tg000100l,length=77990>
+##contig=<ID=h2tg000101l,length=43422>
+##contig=<ID=h2tg000102l,length=69326>
+##contig=<ID=h2tg000103l,length=68289>
+##contig=<ID=h2tg000104l,length=64960>
+##contig=<ID=h2tg000105l,length=53616>
+##contig=<ID=h2tg000106l,length=36522>
+##contig=<ID=h2tg000107l,length=45107>
+##contig=<ID=h2tg000108l,length=40174>
+##contig=<ID=h2tg000109l,length=33444>
+##contig=<ID=h2tg000110l,length=44618>
+##contig=<ID=h2tg000111l,length=79709>
+##contig=<ID=h2tg000112l,length=38419>
+##contig=<ID=h2tg000113l,length=80297>
+##contig=<ID=h2tg000114l,length=63872>
+##contig=<ID=h2tg000115l,length=59608>
+##contig=<ID=h2tg000116l,length=55243>
+##contig=<ID=h2tg000117l,length=32712>
+##contig=<ID=h2tg000118l,length=65297>
+##contig=<ID=h2tg000119l,length=51691>
+##contig=<ID=h2tg000120l,length=55353>
+##contig=<ID=h2tg000121l,length=48352>
+##contig=<ID=h2tg000122l,length=61310>
+##contig=<ID=h2tg000123l,length=25897>
+##contig=<ID=h2tg000124l,length=37923>
+##contig=<ID=h2tg000125l,length=44266>
+##contig=<ID=h2tg000126l,length=30354>
+##contig=<ID=h2tg000127l,length=31371>
+##contig=<ID=h2tg000128l,length=77686>
+##contig=<ID=h2tg000129l,length=33512>
+##contig=<ID=h2tg000130l,length=39523>
+##contig=<ID=h2tg000131l,length=57107>
+##contig=<ID=h2tg000132l,length=24514>
+##contig=<ID=h2tg000133l,length=31057>
+##contig=<ID=h2tg000134l,length=26067>
+##contig=<ID=h2tg000135l,length=17040>
+##bcftools_viewVersion=1.12+htslib-1.12
+##bcftools_viewCommand=view --header polisher_output.unsorted.vcf; Date=Wed Feb  7 00:31:53 2024
+##INFO=<ID=REP_ANN,Number=.,Type=String,Description="repeat annotation for homopolymer and dimer context">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG04115
+h2tg000055l	13128	.	C	CC	4	PASS	REP_ANN=:HOMOPOLYMER:2:G:HOMOPOLYMER:2:C	GT:GQ	0/1:4
+h2tg000055l	25294	.	TGGG	T	21	PASS	REP_ANN=:HOMOPOLYMER:4:G	GT:GQ	0/1:21
+h2tg000055l	25748	.	A	G	18	PASS	REP_ANN=:DIMER:4:TG	GT:GQ	0/1:18
+h2tg000055l	25749	.	T	A	21	PASS	REP_ANN=:DIMER:4:TG	GT:GQ	0/1:21
+h2tg000055l	39304	.	G	GCC	7	PASS	REP_ANN=:HOMOPOLYMER:2:C:HOMOPOLYMER:14:C	GT:GQ	0/1:7
+h2tg000055l	50640	.	TC	T	8	PASS	REP_ANN=:HOMOPOLYMER:2:T	GT:GQ	0/1:8
+h2tg000055l	75964	.	C	CATACA	4	PASS	REP_ANN=:HOMOPOLYMER:2:C	GT:GQ	0/1:4
+h2tg000055l	76635	.	G	GTC	16	PASS	REP_ANN=:DIMER:32:TC	GT:GQ	0/1:16
+h2tg000055l	78109	.	CTGTCTCTCTCTGTGCCTG	C	23	PASS	REP_ANN=:DIMER:6:TC:DIMER:6:TC	GT:GQ	0/1:23
+h2tg000055l	78459	.	G	GTCTC	30	PASS	REP_ANN=:DIMER:28:TC	GT:GQ	0/1:30
+h2tg000055l	81121	.	TTC	T	6	PASS	REP_ANN=:HOMOPOLYMER:3:T:DIMER:34:CT	GT:GQ	0/1:6
+h2tg000055l	89837	.	T	TTGAG	28	PASS	REP_ANN=:DIMER:4:CT	GT:GQ	0/1:28
+h2tg000055l	91314	.	T	TC	32	PASS	REP_ANN=:HOMOPOLYMER:3:T:HOMOPOLYMER:4:C	GT:GQ	0/1:32
+h2tg000055l	94408	.	AT	A	5	PASS	REP_ANN=:HOMOPOLYMER:2:A:HOMOPOLYMER:26:T	GT:GQ	0/1:5
+h2tg000055l	114828	.	GTCTC	G	21	PASS	REP_ANN=:DIMER:8:TC:DIMER:50:TC	GT:GQ	0/1:21
+h2tg000055l	115769	.	CACA	C	9	PASS	REP_ANN=:DIMER:52:AC	GT:GQ	0/1:9
+h2tg000055l	130163	.	G	GC	5	PASS	REP_ANN=:HOMOPOLYMER:2:C:HOMOPOLYMER:14:C	GT:GQ	0/1:5
+h2tg000055l	134047	.	GCT	G	18	PASS	REP_ANN=:HOMOPOLYMER:3:A:HOMOPOLYMER:2:G:DIMER:4:CT	GT:GQ	0/1:18
+h2tg000055l	134125	.	TAGTAAA	T	17	PASS	REP_ANN=:HOMOPOLYMER:2:C:HOMOPOLYMER:4:A	GT:GQ	0/1:17
+h2tg000055l	139255	.	A	AT	4	PASS	REP_ANN=:HOMOPOLYMER:2:A:HOMOPOLYMER:24:T	GT:GQ	0/1:4
+h2tg000055l	141506	.	T	TTTC	17	PASS	REP_ANN=:DIMER:4:CT:HOMOPOLYMER:4:T	GT:GQ	0/1:17
+h2tg000055l	150435	.	GGAG	G	5	PASS	REP_ANN=:HOMOPOLYMER:3:G:DIMER:20:AG	GT:GQ	0/1:5
+h2tg000055l	150865	.	GT	G	7	PASS	REP_ANN=:HOMOPOLYMER:3:G:HOMOPOLYMER:2:G	GT:GQ	0/1:7
+h2tg000055l	160455	.	T	TA	8	PASS	REP_ANN=:DIMER:4:AC:DIMER:44:AC	GT:GQ	0/1:8
+h2tg000055l	162203	.	TCCTCC	T	6	PASS	REP_ANN=:HOMOPOLYMER:2:C:HOMOPOLYMER:4:C	GT:GQ	0/1:6
+h2tg000055l	163172	.	G	GT	3	PASS	REP_ANN=:HOMOPOLYMER:2:T:HOMOPOLYMER:2:G:DIMER:54:TC	GT:GQ	0/1:3
+h2tg000055l	172451	.	G	GTC	18	PASS	REP_ANN=:DIMER:4:TC:DIMER:24:TC	GT:GQ	0/1:18
+h2tg000055l	174918	.	G	GC	10	PASS	REP_ANN=:HOMOPOLYMER:2:C:HOMOPOLYMER:14:C	GT:GQ	0/1:10
+h2tg000055l	183516	.	G	GGGT	24	PASS	REP_ANN=:HOMOPOLYMER:3:G	GT:GQ	0/1:24
+h2tg000055l	196865	.	GC	G	22	PASS	REP_ANN=:HOMOPOLYMER:2:G:HOMOPOLYMER:9:C	GT:GQ	0/1:22
+h2tg000055l	199552	.	GGGC	G	24	PASS	REP_ANN=:HOMOPOLYMER:2:G:HOMOPOLYMER:3:G:HOMOPOLYMER:2:G	GT:GQ	0/1:24
+h2tg000055l	206020	.	A	ATG	14	PASS	REP_ANN=:HOMOPOLYMER:2:G:DIMER:50:TG	GT:GQ	0/1:14
+h2tg000055l	213840	.	G	GTC	3	PASS	REP_ANN=:DIMER:8:TC:DIMER:40:TC	GT:GQ	0/1:3
+h2tg000055l	214422	.	TA	T	18	PASS	REP_ANN=:HOMOPOLYMER:2:C:HOMOPOLYMER:2:A	GT:GQ	0/1:18
+h2tg000055l	217600	.	C	CCT	9	PASS	REP_ANN=:HOMOPOLYMER:2:C	GT:GQ	0/1:9
+h2tg000055l	217699	.	T	TC	22	PASS	REP_ANN	GT:GQ	0/1:22
+h2tg000055l	219661	.	G	GC	9	PASS	REP_ANN=:HOMOPOLYMER:2:C:HOMOPOLYMER:14:C	GT:GQ	0/1:9
+h2tg000055l	228763	.	A	AT	4	PASS	REP_ANN=:HOMOPOLYMER:2:A:HOMOPOLYMER:40:T	GT:GQ	0/1:4
+h2tg000055l	229791	.	G	GATCA	3	PASS	REP_ANN	GT:GQ	0/1:3
+h2tg000055l	249099	.	T	TTTTTT	4	PASS	REP_ANN=:HOMOPOLYMER:23:T	GT:GQ	0/1:4
+h2tg000055l	259050	.	T	TTC	8	PASS	REP_ANN=:HOMOPOLYMER:3:T	GT:GQ	0/1:8
+h2tg000055l	262550	.	C	CCTCT	4	PASS	REP_ANN=:HOMOPOLYMER:2:C	GT:GQ	0/1:4
+h2tg000055l	264612	.	G	GC	3	PASS	REP_ANN=:HOMOPOLYMER:2:C:HOMOPOLYMER:14:C	GT:GQ	0/1:3
