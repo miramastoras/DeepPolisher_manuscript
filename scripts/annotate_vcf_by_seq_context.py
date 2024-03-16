@@ -4,7 +4,7 @@ Author: Mira Mastoras, mmastora@ucsc.edu
 Usage: python3 annotate_vcf_by_seq_context.py \
             -v /Users/miramastoras/Desktop/test_files_annotate_vcf/HG04115.polisher_output.h2tg000055l.vcf \
             -f /Users/miramastoras/Desktop/test_files_annotate_vcf/HG04115.mat.h2tg000055l.fa \
-            -o /Users/miramastoras/Desktop/test_files_annotate_vcf/output.vcf
+            -o /Users/miramastoras/Desktop/test_files_annotate_vcf/out.vcf
 '''
 import argparse
 import pysam
@@ -75,7 +75,6 @@ def fetch_repeat_annotation(contig,start,end,FastaFileObject):
     '''
     seq = FastaFileObject.fetch(reference=contig, start=start, end=end)
     repeat_coords=[]
-
     end_index = 0
     dimer_base = '**'
     hom_base='*'
@@ -91,8 +90,8 @@ def fetch_repeat_annotation(contig,start,end,FastaFileObject):
 
             if dimer_length > 1 and end_index <= len(seq) - 1 :
                 repeat_coords.append([contig,i+start,end_index-1+start,dimer_base,"DIMER"])
-                #print(contig,start + i,start + (end_index-1),dimer_base)
-                i = end_index
+                print(contig,start + i,start + (end_index-1),dimer_base)
+                i = end_index - 1 # allows for edge case where one dimer goes into a different dimer or a homopolymer (allows overlaps)
             else:
                 # if dimer length is only 2 bp, we want to start next check on second base in the pair
                 i = end_index - 1
@@ -105,15 +104,14 @@ def fetch_repeat_annotation(contig,start,end,FastaFileObject):
 
             if hom_length >= 1 :
                 repeat_coords.append([contig, i+start,end_index-1+start, hom_base, "HOMOPOLYMER"])
-                #print(contig, start+i, start+(end_index-1), hom_base)
-            i = end_index
+                print(contig, start+i, start+(end_index-1), hom_base)
+            i = end_index - 1 # allows for edge case of end of homopolymer being start of a dimer
 
     return repeat_coords
 
 def annotate_variants(vcf_file,fasta_file,vcf_out):
     # for each record in vcf, fetch annotations in 200 bp windows on each side
     # this is to make sure we can capture lengths of very long repeats around the variants
-    # vcf is 1-based while the fasta and annotations are 0-based
     for rec in vcf_file.fetch():
         # remove any SVs
         alternate_allele = rec.alleles[1]
@@ -123,28 +121,36 @@ def annotate_variants(vcf_file,fasta_file,vcf_out):
 
         # fetch annotations
         seq_start = rec.start - 200
-        seq_end = rec.stop -1 + 200
+        seq_end = rec.stop + 200
         annotations = fetch_repeat_annotation(contig=rec.contig, start=seq_start, end=seq_end,
                                    FastaFileObject=fasta_file)
-
+        #print("rec start ",rec.start, " rec stop ", rec.stop)
         variant_annotation = ""
 
         if len(annotations)==0:
             continue
         else:
             for block in annotations:
-                # add 1 to the annotation coordinates because vcf is 1-based while the fasta was 0-based
-                block_start=block[1] + 1
-                block_end=block[2] + 1
+                block_start=block[1]
+                block_end=block[2]
 
                 block_len=block_end - block_start +1
 
                 # check if block is inside annotation
                 if (rec.start in range(block_start,block_end)) or (rec.stop in range(block_start,block_end)):
+                    #print("block inside annotation")
+                    #print(block)
+                    variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
+                # in the case of large deletion, check if there are homopolymers or dimers inside the deleted segment
+                elif (block_start in range(rec.start,rec.stop)) or (block_end in range(rec.start,rec.stop)):
+                    #print("annotation inside variant")
+                    #print(block)
                     variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
                 # check if block is book-ended by an annotation
                 elif abs(rec.start - block_end) == 1 or abs(rec.start - block_start) == 1 or abs(rec.stop - block_end) == 1 or abs(rec.stop - block_start) == 1:
                     variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
+                    #print("block bookended by annotation")
+                    #print(block)
 
         rec.info.__setitem__('REP_ANN',variant_annotation[1:len(variant_annotation)])
         vcf_out.write(rec)
