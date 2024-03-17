@@ -112,6 +112,13 @@ def fetch_repeat_annotation(contig,start,end,FastaFileObject):
     return repeat_coords
 
 def annotate_variants(vcf_file,fasta_file,vcf_out,bed_out):
+    '''
+    :param vcf_file: pysam VariantFile object
+    :param fasta_file: pysam FastaFile object
+    :param vcf_out: VariantFile output object
+    :param bed_out: opened bed file for writing
+    :return: nothing
+    '''
     # for each record in vcf, fetch annotations in 200 bp windows on each side
     # this is to make sure we can capture lengths of very long repeats around the variants
     for rec in vcf_file.fetch():
@@ -121,19 +128,21 @@ def annotate_variants(vcf_file,fasta_file,vcf_out,bed_out):
         if len(alternate_allele) > 50:
             continue
 
-        # fetch annotations
-        seq_start = rec.start - 200
-        seq_end = rec.stop + 200
+        # fetch annotations. Don't go past start or end of current contig.
+        seq_start = max(rec.start - 200, 0)
+        seq_end = min(rec.stop + 200,len(fasta_file.fetch(rec.contig))-1)
         annotations = fetch_repeat_annotation(contig=rec.contig, start=seq_start, end=seq_end,
                                    FastaFileObject=fasta_file)
-        #print("rec start ",rec.start, " rec stop ", rec.stop)
+
         variant_annotation = ""
 
         if len(annotations)==0:
             continue
         else:
             for block in annotations:
+                # write all annotations 200 bp around variant
                 print(block[0],block[1],block[2]+1,block[3],block[4],sep="\t",file=bed_out)
+
                 block_start=block[1]
                 block_end=block[2]
 
@@ -141,19 +150,16 @@ def annotate_variants(vcf_file,fasta_file,vcf_out,bed_out):
 
                 # check if block is inside annotation
                 if (rec.start in range(block_start,block_end)) or (rec.stop in range(block_start,block_end)):
-                    #print("block inside annotation")
-                    #print(block)
                     variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
+
                 # in the case of large deletion, check if there are homopolymers or dimers inside the deleted segment
                 elif (block_start in range(rec.start,rec.stop)) or (block_end in range(rec.start,rec.stop)):
-                    #print("annotation inside variant")
-                    #print(block)
                     variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
+
                 # check if block is book-ended by an annotation
                 elif abs(rec.start - block_end) == 1 or abs(rec.start - block_start) == 1 or abs(rec.stop - block_end) == 1 or abs(rec.stop - block_start) == 1:
                     variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
-                    #print("block bookended by annotation")
-                    #print(block)
+
 
         rec.info.__setitem__('REP_ANN',variant_annotation[1:len(variant_annotation)])
         vcf_out.write(rec)
