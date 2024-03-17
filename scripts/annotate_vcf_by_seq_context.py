@@ -4,11 +4,12 @@ Author: Mira Mastoras, mmastora@ucsc.edu
 Usage: python3 annotate_vcf_by_seq_context.py \
             -v /Users/miramastoras/Desktop/test_files_annotate_vcf/HG04115.polisher_output.h2tg000055l.vcf \
             -f /Users/miramastoras/Desktop/test_files_annotate_vcf/HG04115.mat.h2tg000055l.fa \
-            -o /Users/miramastoras/Desktop/test_files_annotate_vcf/out.vcf
+            -o /Users/miramastoras/Desktop/test_files_annotate_vcf
 '''
 import argparse
 import pysam
 from pysam import VariantFile, FastaFile
+import os
 
 
 def arg_parser():
@@ -22,9 +23,9 @@ def arg_parser():
     parser.add_argument("-f", "--fasta",
                         required=True,
                         help="input fasta file")
-    parser.add_argument("-o", "--out_vcf",
+    parser.add_argument("-o", "--out_dir",
                         required=True,
-                        help="output file")
+                        help="directory to put output files")
     parser.add_argument("-v", "--vcf",
                         required=False,
                         help="input vcf file")
@@ -90,7 +91,7 @@ def fetch_repeat_annotation(contig,start,end,FastaFileObject):
 
             if dimer_length > 1 and end_index <= len(seq) - 1 :
                 repeat_coords.append([contig,i+start,end_index-1+start,dimer_base,"DIMER"])
-                print(contig,start + i,start + (end_index-1),dimer_base)
+                #print(contig,start + i,start + (end_index-1),dimer_base)
                 i = end_index - 1 # allows for edge case where one dimer goes into a different dimer or a homopolymer (allows overlaps)
             else:
                 # if dimer length is only 2 bp, we want to start next check on second base in the pair
@@ -104,12 +105,12 @@ def fetch_repeat_annotation(contig,start,end,FastaFileObject):
 
             if hom_length >= 1 :
                 repeat_coords.append([contig, i+start,end_index-1+start, hom_base, "HOMOPOLYMER"])
-                print(contig, start+i, start+(end_index-1), hom_base)
+                #print(contig, start+i, start+(end_index-1), hom_base)
             i = end_index - 1 # allows for edge case of end of homopolymer being start of a dimer
 
     return repeat_coords
 
-def annotate_variants(vcf_file,fasta_file,vcf_out):
+def annotate_variants(vcf_file,fasta_file,vcf_out,bed_out):
     # for each record in vcf, fetch annotations in 200 bp windows on each side
     # this is to make sure we can capture lengths of very long repeats around the variants
     for rec in vcf_file.fetch():
@@ -131,6 +132,7 @@ def annotate_variants(vcf_file,fasta_file,vcf_out):
             continue
         else:
             for block in annotations:
+                print(block[0],block[1],block[2]+1,block[3],block[4],sep="\t",file=bed_out)
                 block_start=block[1]
                 block_end=block[2]
 
@@ -166,13 +168,19 @@ def main():
     small_variant_vcf = VariantFile(args.vcf)
     assembly_fasta_file = FastaFile(args.fasta)
 
+    file_basename=os.path.basename(args.vcf).split(".vcf")[0]
+    vcf_out_filename=args.out_dir + "/" + file_basename + ".rep_annotated.vcf"
+    bed_out_filename=args.out_dir + "/" + file_basename + ".rep_annotations.bed"
+
     small_variant_vcf.header.add_meta('INFO', items=[('ID', 'REP_ANN'), ('Number', '.'), ('Type', 'String'),
-                                          ('Description', "repeat annotation for homopolymer and dimer context")])
+                                          ('Description', "repeat annotation for homopolymer and dimer context of variant")])
 
-    vcf_out = VariantFile(args.out_vcf, 'w', header=small_variant_vcf.header)
+    vcf_out = VariantFile(vcf_out_filename, 'w', header=small_variant_vcf.header)
+    bed_out = open(bed_out_filename,'w')
 
-    annotate_variants(small_variant_vcf,assembly_fasta_file,vcf_out)
+    annotate_variants(small_variant_vcf,assembly_fasta_file,vcf_out,bed_out)
 
+    bed_out.close()
 
 if __name__ == '__main__':
     main()
