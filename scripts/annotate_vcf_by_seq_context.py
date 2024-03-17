@@ -1,10 +1,7 @@
 '''
 Purpose: Annotate variants in a vcf file by sequence context
 Author: Mira Mastoras, mmastora@ucsc.edu
-Usage: python3 annotate_vcf_by_seq_context.py \
-            -v /Users/miramastoras/Desktop/test_files_annotate_vcf/HG04115.polisher_output.h2tg000055l.vcf \
-            -f /Users/miramastoras/Desktop/test_files_annotate_vcf/HG04115.mat.h2tg000055l.fa \
-            -o /Users/miramastoras/Desktop/test_files_annotate_vcf/
+Usage: python3 annotate_vcf_by_seq_context.py [-h] -f FASTA -o OUT_PREFIX -v VCF
 '''
 import argparse
 import pysam
@@ -163,6 +160,7 @@ def annotate_variants(vcf_file,fasta_file,vcf_out,bed_out):
 
         rec.info.__setitem__('REP_ANN',variant_annotation[1:len(variant_annotation)])
         vcf_out.write(rec)
+        print("Processed variant: " + rec)
 
     return
 
