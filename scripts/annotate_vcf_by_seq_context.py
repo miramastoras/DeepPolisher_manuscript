@@ -147,15 +147,15 @@ def annotate_variants(vcf_file,fasta_file,vcf_out,bed_out):
 
                 # check if block is inside annotation
                 if (rec.start in range(block_start,block_end)) or (rec.stop in range(block_start,block_end)):
-                    variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
+                    variant_annotation = variant_annotation + "," + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
 
                 # in the case of large deletion, check if there are homopolymers or dimers inside the deleted segment
                 elif (block_start in range(rec.start,rec.stop)) or (block_end in range(rec.start,rec.stop)):
-                    variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
+                    variant_annotation = variant_annotation + "," + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
 
                 # check if block is book-ended by an annotation
                 elif abs(rec.start - block_end) == 1 or abs(rec.start - block_start) == 1 or abs(rec.stop - block_end) == 1 or abs(rec.stop - block_start) == 1:
-                    variant_annotation = variant_annotation + ":" + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
+                    variant_annotation = variant_annotation + "," + str(block[4]) + ":" + str(block[3]) + ":" + str(block_len)
 
 
         rec.info.__setitem__('REP_ANN',variant_annotation[1:len(variant_annotation)])
