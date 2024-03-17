@@ -18,16 +18,17 @@ def arg_parser():
     '''
     parser = argparse.ArgumentParser(
         prog='annotate_vcf_by_seq_context.py',
-        description="""Annotate variants in vcf by sequence context (dimer or homopolymer)""")
+        description="Annotate variants in vcf by sequence context (dimer or homopolymer).\
+        Repeat annotations will be stored in the vcf INFO column with the format REP_ANN=[HOMOPOLYMER/DIMER]:[repeat pattern]:[repeat length]")
 
     parser.add_argument("-f", "--fasta",
                         required=True,
                         help="input fasta file")
     parser.add_argument("-o", "--out_dir",
                         required=True,
-                        help="directory to put output files")
+                        help="directory to save output files")
     parser.add_argument("-v", "--vcf",
-                        required=False,
+                        required=True,
                         help="input vcf file")
 
     return parser.parse_args()
