@@ -126,8 +126,8 @@ def annotate_variants(vcf_file,fasta_file,vcf_out,bed_out):
             continue
 
         # fetch annotations. Don't go past start or end of current contig.
-        seq_start = max(rec.start - 200, 0)
-        seq_end = min(rec.stop + 200,len(fasta_file.fetch(rec.contig))-1)
+        seq_start = max(rec.start - 100, 0)
+        seq_end = min(rec.stop + 100,len(fasta_file.fetch(rec.contig))-1)
         annotations = fetch_repeat_annotation(contig=rec.contig, start=seq_start, end=seq_end,
                                    FastaFileObject=fasta_file)
 
