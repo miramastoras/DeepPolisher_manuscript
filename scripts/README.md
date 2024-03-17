@@ -15,8 +15,8 @@ Optional arguments:
   -h, --help            show this help message and exit
   -f FASTA, --fasta FASTA
                         input fasta file
-  -o OUT_DIR, --out_dir OUT_DIR
-                        directory to save output files
+  -o OUT_PREFIX, --out_prefix OUT_PREFIX
+                        output files prefix
   -v VCF, --vcf VCF     input vcf file
 
 ```

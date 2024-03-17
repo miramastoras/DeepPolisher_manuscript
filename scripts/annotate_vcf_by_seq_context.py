@@ -4,7 +4,7 @@ Author: Mira Mastoras, mmastora@ucsc.edu
 Usage: python3 annotate_vcf_by_seq_context.py \
             -v /Users/miramastoras/Desktop/test_files_annotate_vcf/HG04115.polisher_output.h2tg000055l.vcf \
             -f /Users/miramastoras/Desktop/test_files_annotate_vcf/HG04115.mat.h2tg000055l.fa \
-            -o /Users/miramastoras/Desktop/test_files_annotate_vcf
+            -o /Users/miramastoras/Desktop/test_files_annotate_vcf/
 '''
 import argparse
 import pysam
@@ -24,9 +24,9 @@ def arg_parser():
     parser.add_argument("-f", "--fasta",
                         required=True,
                         help="input fasta file")
-    parser.add_argument("-o", "--out_dir",
+    parser.add_argument("-o", "--out_prefix",
                         required=True,
-                        help="directory to save output files")
+                        help="output files prefix")
     parser.add_argument("-v", "--vcf",
                         required=True,
                         help="input vcf file")
@@ -170,8 +170,8 @@ def main():
     assembly_fasta_file = FastaFile(args.fasta)
 
     file_basename=os.path.basename(args.vcf).split(".vcf")[0]
-    vcf_out_filename=args.out_dir + "/" + file_basename + ".rep_annotated.vcf"
-    bed_out_filename=args.out_dir + "/" + file_basename + ".rep_annotations.bed"
+    vcf_out_filename=args.out_prefix + file_basename + ".rep_annotated.vcf"
+    bed_out_filename=args.out_prefix  + file_basename + ".rep_annotations.bed"
 
     small_variant_vcf.header.add_meta('INFO', items=[('ID', 'REP_ANN'), ('Number', '.'), ('Type', 'String'),
                                           ('Description', "repeat annotation for homopolymer and dimer context of variant")])
