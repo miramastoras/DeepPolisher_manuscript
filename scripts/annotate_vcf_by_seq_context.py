@@ -160,7 +160,6 @@ def annotate_variants(vcf_file,fasta_file,vcf_out,bed_out):
 
         rec.info.__setitem__('REP_ANN',variant_annotation[1:len(variant_annotation)])
         vcf_out.write(rec)
-        print("Processed variant: " + rec)
 
     return
 
