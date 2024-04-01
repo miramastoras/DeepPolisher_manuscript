@@ -8,7 +8,7 @@ HG002.trio_hifiasm_0.19.5.DCv1.2.minimap2v2.26.PHARAOH.bam
 HG002.trio_hifiasm_0.19.5.DC_1.2_40x.R1041_Dorado_v0.1.1_43x_alignment.minimap2.26.bam
 ```
 
-Create header mapping file. RG ID must be the prefix of each .bam file 
+Create header mapping file. RG ID must be the prefix of each .bam file. PL tag can only be PACBIO or ONT (https://samtools.github.io/hts-specs/SAMv1.pdf)
 ```
 printf '@RG\tID:HG002.trio_hifiasm_0.19.5.DCv1.2.minimap2v2.26.PHARAOH\tPL:PACBIO\n@RG\tID:HG002.trio_hifiasm_0.19.5.DC_1.2_40x.R1041_Dorado_v0.1.1_43x_alignment.minimap2.26\tPL:ONT\n' > rg.txt
 ```
