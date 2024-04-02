@@ -1,10 +1,14 @@
-## Polishing HG002 with a second round of element-deepvariant calls
+## Polishing HG002 assembly with a second round of element-deepvariant calls
+
+The purpose of this analysis is to test whether adding an additional round of element-deepvariant polishing can clean up calls missed by DeepPolisher-hifi.
+
+### 0. Download element data from the Q100 project
 
 Element data obtained from Q100 project: https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/HG002/assemblies/polishing/HG002/v1.0/mapping/element_trio_all_to_one/
 
 ```
 #!/bin/bash
-cd /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1
+cd /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ
 
 wget https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/polishing/HG002/v1.0/mapping/element_trio_all_to_one/hg002v1.0.mat.Y.EBV_hg002_element_ins1000.dedup.bam
 
@@ -15,11 +19,13 @@ wget https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/p
 wget https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/polishing/HG002/v1.0/mapping/element_trio_all_to_one/hg002v1.0.mat.Y.EBV_hg002_element_ins500_600.dedup.bam.bai
 ```
 
-### 1. Generating alignments of all element reads to each haplotype of the HG002 hprc hifiasm v0.19.5 assembly polished by DeepPolisher minimap2 model1
+### 1. Generating alignments of all element reads to each haplotype
+
+Using the HG002 hprc hifiasm v0.19.5 assembly polished by DeepPolisher minimap2 model1 with the HPRC GQ filters
 
 ```
 #!/bin/bash
-#SBATCH --job-name=element_pat_mm2
+#SBATCH --job-name=element_all_to_one
 #SBATCH --mail-type=FAIL,END
 #SBATCH --partition=high_priority
 #SBATCH --mail-user=mmastora@ucsc.edu
@@ -29,13 +35,13 @@ wget https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/p
 #SBATCH --output=%x.%j.log
 #SBATCH --time=20:00:00
 
-MAT_ASM=/private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG002_y2_DCv1.2_PHv6_DPmm2model1_dockerv0.0.8_12122023/applyPolish_dipcall_happy/applyPolish_dipcall_outfiles/HG002_hap2.polished.fasta
+MAT_ASM=/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.polished.fasta
 
-PAT_ASM=/private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG002_y2_DCv1.2_PHv6_DPmm2model1_dockerv0.0.8_12122023/applyPolish_dipcall_happy/applyPolish_dipcall_outfiles/HG002_hap1.polished.fasta
+PAT_ASM=/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.fasta
 
-OUTDIR=/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1
+OUTDIR=/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ
 
-samtools fastq -@32 /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/hg002v1.0.mat.Y.EBV_hg002_element_ins500_600.dedup.bam > ${OUTDIR}/hg002.element_ins500_600.fastq
+samtools fastq -@32 /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/hg002v1.0.mat.Y.EBV_hg002_element_ins500_600.dedup.bam > ${OUTDIR}/hg002.element_ins500_600.fastq
 
 samtools fastq -@32 ${OUTDIR}/hg002v1.0.mat.Y.EBV_hg002_element_ins1000.dedup.bam > ${OUTDIR}/hg002.element_ins1000.fastq
 
@@ -60,7 +66,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
 ```
 {
   "runCorrectBam.correctBam.dockerImage": "mobinasri/secphase:dev-v0.2.0-hom",
-  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/element_ins1000_mat/HG002.ins1000.mm2.all_to_y2_mat.polished.bam",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/element_ins1000_mat/HG002.ins1000.mm2.all_to_y2_mat.polished.bam",
   "runCorrectBam.correctBam.options": "--maxDiv 0.04 --minReadLen 0 --minAlignmentLen 0",
   "runCorrectBam.correctBam.suffix": "maxDiv.04"
 }
@@ -68,7 +74,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
 ```
 {
   "runCorrectBam.correctBam.dockerImage": "mobinasri/secphase:dev-v0.2.0-hom",
-  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/element_ins1000_pat/HG002.ins1000.mm2.all_to_y2_pat.polished.bam",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/element_ins1000_pat/HG002.ins1000.mm2.all_to_y2_pat.polished.bam",
   "runCorrectBam.correctBam.options": "--maxDiv 0.04 --minReadLen 0 --minAlignmentLen 0",
   "runCorrectBam.correctBam.suffix": "maxDiv.04"
 }
@@ -76,7 +82,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
 ```
 {
   "runCorrectBam.correctBam.dockerImage": "mobinasri/secphase:dev-v0.2.0-hom",
-  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/element_ins500_600_pat/HG002.ins500_600.mm2.all_to_y2_pat.polished.bam",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/element_ins500_600_pat/HG002.ins500_600.mm2.all_to_y2_pat.polished.bam",
   "runCorrectBam.correctBam.options": "--maxDiv 0.04 --minReadLen 0 --minAlignmentLen 0",
   "runCorrectBam.correctBam.suffix": "maxDiv.04"
 }
@@ -84,17 +90,17 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
 ```
 {
   "runCorrectBam.correctBam.dockerImage": "mobinasri/secphase:dev-v0.2.0-hom",
-  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/element_ins500_600_mat/HG002.ins500_600.mm2.all_to_y2_mat.polished.bam",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/element_ins500_600_mat/HG002.ins500_600.mm2.all_to_y2_mat.polished.bam",
   "runCorrectBam.correctBam.options": "--maxDiv 0.04 --minReadLen 0 --minAlignmentLen 0",
   "runCorrectBam.correctBam.suffix": "maxDiv.04"
 }
 ```
 
 ```
-cd /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/element_ins1000_pat
-/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/element_ins1000_mat
-/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/element_ins500_600_pat
-/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1/element_ins500_600_mat
+cd /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/element_ins1000_pat
+/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/element_ins1000_mat
+/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/element_ins500_600_pat
+/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/element_ins500_600_mat
 
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
@@ -121,3 +127,5 @@ time toil-wdl-runner \
     --restart \
     2>&1 | tee log.txt
 ```
+
+### 2. Run DeepVariant on element alignments 
