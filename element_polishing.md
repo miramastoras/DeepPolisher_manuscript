@@ -124,8 +124,7 @@ time toil-wdl-runner \
     --retryCount 1 \
     --disableProgress \
     --logDebug \
-    --restart \
     2>&1 | tee log.txt
 ```
 
-### 2. Run DeepVariant on element alignments 
+### 2. Run DeepVariant on element alignments
