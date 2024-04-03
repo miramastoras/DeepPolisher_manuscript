@@ -105,7 +105,7 @@ cd /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_a
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
 export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=4:00:00 --partition=high_priority"
+export TOIL_SLURM_ARGS="--time=24:00:00 --partition=high_priority"
 export TOIL_COORDINATION_DIR=/data/tmp
 
 mkdir -p toil_logs

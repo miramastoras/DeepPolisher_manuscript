@@ -46,6 +46,8 @@ docker run -u `id -u`:`id -g` \
 
 samtools index /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/illumina_all_to_dip/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.HiSeq30x.bwa.bam
 ```
+
+
 **Generate R9 winnowmap all to dip alignments**
 
 **Generate R9 ONT alignments**
@@ -123,6 +125,24 @@ python3 ~/progs/mosdepth/scripts/plot-dist.py /private/groups/patenlab/mira/hprc
 
 Confirmed 40x coverage
 
+Merge HiFi and illumina bam files
+```
+#!/bin/bash
+#SBATCH --job-name=merge_ilm_hifi_HG002
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=6:00:00
+
+
+samtools merge -@32 \
+    /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/hybrid_hifi_ilm/HG002.trio_hifiasm_0.19.5.DC_1.2.diploid.DC_1.2_40x.winnowmap_2.03.Bwa.HiSeq_30x_hybrid.bam \
+    /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/hifi_winnowmap/toil_winnow_full_cov_out/HG002.DCv1.2.full_coverage.winnowmapv2.03.bam \
+    /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/illumina_all_to_dip/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.HiSeq30x.bwa.srt.bam
+```
 
 #### 1.2 HG005
 
@@ -137,7 +157,7 @@ docker run --rm -u `id -u`:`id -g` \
     /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa
 ```
 
-Convert bam to fastq
+Bwa mem align
 ```
 #!/bin/bash
 #SBATCH --job-name=HG005_ilm
@@ -159,6 +179,29 @@ docker run -u `id -u`:`id -g` \
     > /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.bwa.bam
 
 samtools index /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.bwa.bam
+```
+
+Check coverage
+```
+#!/bin/bash
+#SBATCH --job-name=HG005_mosdepth
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=4
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/mosdepth/:/opt/mount \
+    quay.io/biocontainers/mosdepth:0.2.4--he527e40_0 \
+    mosdepth -n --fast-mode -t 4 /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/mosdepth/HG005 \
+    /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.bwa.bam
+
+python3 ~/progs/mosdepth/scripts/plot-dist.py /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/hifi_winnowmap/toil_winnow_full_cov_out/mosdepth/HG002.mosdepth.global.dist.txt
 ```
 **Generate R9 ONT alignments**
 
@@ -345,7 +388,7 @@ Run nextpolish2 on HG002
 #SBATCH --partition=medium
 #SBATCH --mail-user=mmastora@ucsc.edu
 #SBATCH --nodes=1
-#SBATCH --mem=128gb
+#SBATCH --mem=300gb
 #SBATCH --cpus-per-task=32
 #SBATCH --threads-per-core=1
 #SBATCH --output=%x.%j.log
@@ -364,7 +407,7 @@ Run nextpolish2 on HG005
 #SBATCH --partition=medium
 #SBATCH --mail-user=mmastora@ucsc.edu
 #SBATCH --nodes=1
-#SBATCH --mem=128gb
+#SBATCH --mem=500gb
 #SBATCH --cpus-per-task=32
 #SBATCH --threads-per-core=1
 #SBATCH --output=%x.%j.log
