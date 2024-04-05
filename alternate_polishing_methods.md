@@ -76,7 +76,7 @@ cd /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignmen
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
 export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=24:00:00 --partition=long"
+export TOIL_SLURM_ARGS="--time=7-0:00 --partition=long"
 export TOIL_COORDINATION_DIR=/data/tmp
 
 mkdir -p toil_logs
@@ -95,6 +95,7 @@ time toil-wdl-runner \
     --retryCount 1 \
     --disableProgress \
     --logDebug \
+    --restart \
     2>&1 | tee log.txt
 ```
 
@@ -194,6 +195,9 @@ Check coverage
 #SBATCH --output=%x.%j.log
 #SBATCH --time=12:00:00
 
+samtools sort -@32 /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.bwa.bam > /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.bwa.srt.bam
+
+
 docker run -u `id -u`:`id -g` \
     -v /private/groups:/private/groups \
     -v /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/mosdepth/:/opt/mount \
@@ -271,6 +275,26 @@ samtools view -s 0.66 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/d
 
 samtools index /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_40x/HG005.DCv1.2.40x.winnowmapv2.03.bam
 ```
+
+
+Merge HiFi and illumina bam files
+```
+#!/bin/bash
+#SBATCH --job-name=merge_ilm_hifi_HG005
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=6:00:00
+
+
+samtools merge -@32 \
+    /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/hybrid_hifi_ilm/HG005.trio_hifiasm_0.19.5.DC_1.2.diploid.DC_1.2_40x.winnowmap_2.03.Bwa.HiSeq_20x_hybrid.bam /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_40x/HG005.DCv1.2.40x.winnowmapv2.03.bam \
+    /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.bwa.srt.bam
+```
+
 
 ### 2. DeepVariant polishing on winnowmap HiFi alignments
 
