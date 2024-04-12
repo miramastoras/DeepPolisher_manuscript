@@ -440,6 +440,57 @@ time toil-wdl-runner \
     --retryCount 1 \
     --disableProgress \
     --logDebug \
+    --restart \
+    2>&1 | tee log.txt
+```
+
+Run merfin
+
+```
+{
+  "runMerfin.readmerDBTarball": "/private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs//private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.meryl.tar",
+  "runMerfin.Merfin.mode": "-polish",
+  "runMerfin.Merfin.vcfFile": "/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_MERGED_SMALL_VARIANTS.vcf.gz",
+  "runMerfin.Merfin.refFasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa"
+}
+
+```
+
+```
+#!/bin/bash
+#SBATCH --job-name=merfin_HG005
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --threads-per-core=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=8
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+cd /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/merfin.wdl \
+    merfin.inputs.json \
+    --outputDirectory ./merfin.outfiles \
+    --outputFile merfin.outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
     2>&1 | tee log.txt
 ```
 
@@ -497,6 +548,16 @@ docker run -u `id -u`:`id -g` \
   --num_shards=32
 ```
 
+Filter to PASS only
+```
+bcftools view -Oz -f "PASS" -e 'FORMAT/GQ<=25' /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_winnowmap_DV/HG005.dip.y2_hifiasm_0.19.5.DC_1.2.40x.HiFi_winnowmap.deepvariant.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_winnowmap_DV/HG005.dip.y2_hifiasm_0.19.5.DC_1.2.40x.HiFi_winnowmap.deepvariant.PASS.GQ25.vcf.gz
+
+bcftools view -Oz -f "PASS" /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_winnowmap_DV/HG005.dip.y2_hifiasm_0.19.5.DC_1.2.40x.HiFi_winnowmap.deepvariant.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_winnowmap_DV/HG005.dip.y2_hifiasm_0.19.5.DC_1.2.40x.HiFi_winnowmap.deepvariant.PASS.vcf.gz
+
+bcftools view -Oz -f "PASS" -e 'FORMAT/GQ<=25' /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_winnowmap_DV/HG002.dip.y2_hifiasm_0.19.5.DC_1.2.HiFi_winnowmap.deepvariant.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_winnowmap_DV/HG002.dip.y2_hifiasm_0.19.5.DC_1.2.HiFi_winnowmap.deepvariant.PASS.GQ25.vcf.gz
+
+bcftools view -Oz -f "PASS" /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_winnowmap_DV/HG002.dip.y2_hifiasm_0.19.5.DC_1.2.HiFi_winnowmap.deepvariant.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_winnowmap_DV/HG002.dip.y2_hifiasm_0.19.5.DC_1.2.HiFi_winnowmap.deepvariant.PASS.vcf.gz
+```
 ### 3. NextPolish2 polishing on winnowmap HiFi alignments
 
 Remake yak files for k31 for HG002 and HG005
@@ -576,6 +637,59 @@ cat HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.NP2.polished.fa | seqkit grep -r -p
 cat HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.NP2.polished.fa | seqkit grep -r -p '.*h2tg' > HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap2.NP2.polished.fa
 ```
 
+Manually run dipcall and happy evaluation
+
+`dipcall_inputs.json`:
+
+```json
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/nextpolish2/HG002_y2_winnowmap_HiFi/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap2.NP2.polished.fa",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/nextpolish2/HG002_y2_winnowmap_HiFi/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.fa",
+  "runDipcall.dipcall.referenceIsHS38": true,
+  "dipcall.isMaleSample":true
+}
+```
+Run dipcall
+
+```sh
+cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_nextPolish2
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/dipcall.wdl \
+    dipcall_inputs.json \
+    --outputDirectory ./dipcall_outfiles \
+    --outputFile dipcall_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
+
+Intersect bed
+```
+bedtools intersect -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed -b /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_nextPolish2/dipcall_outfiles/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.dipcall.bed > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_nextPolish2/dipcall_outfiles/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.dipcall.GIAB.conf.bed
+```
+
+Run happy
+```
+bash /private/home/mmastora/progs/scripts/GIAB_happy.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_nextPolish2/dipcall_outfiles/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_nextPolish2/dipcall_outfiles/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.dipcall.GIAB.conf.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_nextPolish2/happy_out HG002
+```
+
 Run nextpolish2 on HG005
 ```
 #!/bin/bash
@@ -600,4 +714,46 @@ Separate by Haplotype
 cat HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.NP2.polished.fa | seqkit grep -r -p '.*h1tg' > HG005.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.fa
 
 cat HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.NP2.polished.fa | seqkit grep -r -p '.*h2tg' > HG005.trio_hifiasm_0.19.5.DC_1.2_40x.hap2.NP2.polished.fa
+```
+Manually run dipcall and happy evaluation
+
+`dipcall_inputs.json`:
+
+```json
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/nextpolish2/HG005_y2_winnowmap_HiFi/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.hap2.NP2.polished.fa",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/nextpolish2/HG005_y2_winnowmap_HiFi/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.fa",
+  "runDipcall.dipcall.referenceIsHS38": true,
+  "dipcall.isMaleSample":true
+}
+```
+Run dipcall
+
+```sh
+cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_nextPolish2
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/dipcall.wdl \
+    dipcall_inputs.json \
+    --outputDirectory ./dipcall_outfiles \
+    --outputFile dipcall_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
 ```

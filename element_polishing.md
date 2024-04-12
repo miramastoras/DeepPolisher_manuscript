@@ -100,7 +100,7 @@ mkdir -p toil_logs
 
 time toil-wdl-runner \
     --jobStore ./jobstore \
-    --stats \
+    --stats
     --clean=never \
     --batchSystem slurm \
     --batchLogsDir ./toil_logs \
@@ -114,6 +114,9 @@ time toil-wdl-runner \
     --logDebug \
     2>&1 | tee log.txt
 ```
+
+Check coverage
+
 
 ### 2. Run DeepVariant on element alignments
 
@@ -171,10 +174,44 @@ time docker run \
   --num_shards=32
 ```
 
-Filter variants by GQ7
+Filter variants by GQ7 and extract just homalt variants
 
 ```
 bcftools view -Oz -f "PASS" -e 'FORMAT/GQ<=7' /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.vcf > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.vcf.gz
 
 bcftools view -Oz -f "PASS" -e 'FORMAT/GQ<=7' /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.vcf > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.vcf.gz
+
+# Maternal
+zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.vcf.gz | grep "^#" > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf
+
+zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.vcf.gz | grep -v "^#" | grep "1/1" >> /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf
+
+bcftools stats /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf | head -n 30
+# SN	0	number of records:	2194
+
+# Paternal
+zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.vcf.gz | grep "^#" > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf
+
+zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.vcf.gz | grep -v "^#" | grep "1/1" >> /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf
+
+bcftools stats /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf | head -n 30
+# 2987 records
+```
+
+### 3. Polish with element homalt GQ7 variants, run evaluation
+
+located under phoenix batch submissions github: https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/applyPolish_dipcall_happy/GIAB_samples_manuscript
+
+### 4. Rerun GIAB variant evaluation on just places where GIAB v4.2.1 and Q100 agree.
+
+```
+# intersect concordant bed with dipcall bed
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_concordant.bed -b /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent_intersect_HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.dipcall.bed > 
+
+# DeepPolisher
+bash /private/home/mmastora/progs/scripts/GIAB_happy.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_nextPolish2/dipcall_outfiles/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_nextPolish2/dipcall_outfiles/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.dipcall.GIAB.conf.bed /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/hom_polish_T2T_GIAB_concordant/HG002_y2_DCv1.2_PHv6_mm2_model1_dockerv0.8/happy_out HG002
+
+# DP + element homalt
+
+/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/HG002_GRCh38_T2T_concordant.bed
 ```

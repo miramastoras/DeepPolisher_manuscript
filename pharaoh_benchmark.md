@@ -15,6 +15,34 @@ HG002
 }
 ```
 
+Run DeepPolisher
+```
+cd /private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/HG002_y2_DCv1.2_mm2
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=7-00:00 --partition=long"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/DeepPolisher.wdl \
+    DeepPolisher.inputs.json \
+    --outputDirectory ./DeepPolisher.outfiles \
+    --outputFile DeepPolisher.outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
+
 HG005
 
 first need to align DCv1.2 reads to assembly with minimap2
@@ -73,6 +101,47 @@ time toil-wdl-runner \
     --retryCount 1 \
     --disableProgress \
     --logDebug \
-    --restart \
+    2>&1 | tee log.txt
+```
+
+Run DeepPolisher
+
+```
+{
+  "runDeepPolisher.sampleName": "HG005",
+  "runDeepPolisher.ModelFilesTarGZ": "/private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-665.tar.gz",
+  "runDeepPolisher.Bai": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/long_read_aligner_scattered_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.bam.bai",
+  "runDeepPolisher.useOptimalGQFilter": true,
+  "runDeepPolisher.Fasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa",
+  "runDeepPolisher.dockerImage": "google/deepconsensus:polisher_v0.0.8_12122023",
+  "runDeepPolisher.Bam": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/long_read_aligner_scattered_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.bam"
+}
+```
+
+Run DeepPolisher
+```
+cd /private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/HG005_y2_DCv1.2_mm2
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=7-00:00 --partition=long"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/DeepPolisher.wdl \
+    DeepPolisher.inputs.json \
+    --outputDirectory ./DeepPolisher.outfiles \
+    --outputFile DeepPolisher.outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
     2>&1 | tee log.txt
 ```
