@@ -14,6 +14,47 @@ HG002
   "runDeepPolisher.Bam": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/HiFi_DCv1.2_minimap2_all2diploid/toil_hifi_dv1.2_mm2_all2dip_out/HG002.DCv1.2.minimap2v2.26.bam"
 }
 ```
+Remove reads with de > 0.02
+```
+java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/correct_bam.wdl
+```
+
+```
+{
+  "runCorrectBam.correctBam.dockerImage": "mobinasri/secphase:dev-v0.2.0-hom",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/HiFi_DCv1.2_minimap2_all2diploid/toil_hifi_dv1.2_mm2_all2dip_out/HG002.DCv1.2.minimap2v2.26.bam",
+  "runCorrectBam.correctBam.options": "--maxDiv 0.02 --minReadLen 0 --minAlignmentLen 0",
+  "runCorrectBam.correctBam.suffix": "maxDiv.02"
+}
+```
+
+```
+cd /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/HiFi_DCv1.2_minimap2_all2diploid
+
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=7-00:00 --partition=long"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/correct_bam.wdl \
+    correct_bam_inputs.json \
+    --outputDirectory ./correct_bam_outfiles \
+    --outputFile correct_bam_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
 
 Run DeepPolisher
 ```
@@ -97,6 +138,47 @@ time toil-wdl-runner \
     long_read_aligner_scattered_inputs.json \
     --outputDirectory ./long_read_aligner_scattered_outfiles \
     --outputFile long_read_aligner_scattered_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
+
+Remove reads with de > 0.02
+```
+java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/correct_bam.wdl
+```
+
+```
+{
+  "runCorrectBam.correctBam.dockerImage": "mobinasri/secphase:dev-v0.2.0-hom",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/long_read_aligner_scattered_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.bam",
+  "runCorrectBam.correctBam.options": "--maxDiv 0.02 --minReadLen 0 --minAlignmentLen 0",
+  "runCorrectBam.correctBam.suffix": "maxDiv.02"
+}
+```
+
+```
+cd /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/correct_bam
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=7-00:00 --partition=long"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/correct_bam.wdl \
+    correct_bam_inputs.json \
+    --outputDirectory ./correct_bam_outfiles \
+    --outputFile correct_bam_outputs.json \
     --runLocalJobsOnWorkers \
     --retryCount 1 \
     --disableProgress \
