@@ -60,7 +60,7 @@ time toil-wdl-runner \
 ```
 bedtools intersect -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed -b /private/groups/patenlab/mira/data/GRCh38_HG002-T2TQ100-V1.0_smvar.benchmark.bed > /private/groups/patenlab/mira/data/HG002_GIABv4.2.1_Q100_confidence_intersected.bed
 
-intersect dipcall bed
+# intersect dipcall bed, to only use places alignable between the two assemblies
 
 bedtools intersect -a /private/groups/patenlab/mira/data/HG002_GIABv4.2.1_Q100_confidence_intersected.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.dipcall.bed > /private/groups/patenlab/mira/data/HG002_GIABv4.2.1_Q100_confidence_intersected.dipcall.bed
 ```
@@ -90,16 +90,6 @@ jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
 /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
 /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.dipcall.vcf.gz \
 -r /private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta \
--f /private/groups/patenlab/mira/data/HG002_GIABv4.2.1_Q100_confidence_intersected.bed \
--o /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/dipcall_T2T_GRCh38/happy/happy_out \
---pass-only --no-roc --no-json --engine=vcfeval --threads=16
-
-docker run --rm -u `id -u`:`id -g` \
--v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
-jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
-/private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
-/private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_platinum_truthset/dipcall_T2T_GRCh38/dipcall_outfiles/hg002v1.0.1.dipcall.vcf.gz \
--r /private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta \
 -f /private/groups/patenlab/mira/data/HG002_GIABv4.2.1_Q100_confidence_intersected.dipcall.bed \
 -o /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/dipcall_T2T_GRCh38/happy_dipcall/happy_out \
 --pass-only --no-roc --no-json --engine=vcfeval --threads=32
@@ -111,36 +101,35 @@ https://docs.google.com/spreadsheets/d/11l6R63-JQf10AbeJrZQk52U2HaIA5BdHZb3HYNxR
 ### 4. From hap.py output, subtract all regions with FP/FN from GIAB high confidence bed, +/- 50bp
 
 ```
-cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/dipcall_T2T_GRCh38/happy/
+cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/dipcall_T2T_GRCh38/happy_dipcall/
 
 # extract FP/FN from happy vcf
 zcat happy_out.vcf.gz | grep "^#" > happy_out.FPFN.vcf
 zcat happy_out.vcf.gz | grep -v "^#" | grep :F >> happy_out.FPFN.vcf
 
-# count variants subtracted
+# count variants
 zcat happy_out.vcf.gz | grep -v "^#" | wc -l
 # 4828845
 
+# total hap.py records that are FP or FN
 grep -v "^#" happy_out.FPFN.vcf | wc -l
-# 18088 to be subtracted
+# 2151 records will be subtracted
 
-bedtools intersect -a happy_out.FPFN.vcf -b /private/groups/patenlab/mira/data/HG002_GIABv4.2.1_Q100_confidence_intersected.bed | wc -l
-
-# convert to bed, add 50bp on each side of the variant
+# convert FP/FN hap.py variants to bed, add 50bp on each side of the variant
 export PATH=$PATH:/private/home/mmastora/progs/bin/
-
-# all GIAB
 /private/home/mmastora/progs/bin/vcf2bed --do-not-split < happy_out.FPFN.vcf | awk '{print $1"\t"$2-50"\t"$3+50"\t"$6"\t"$7"\t"$10"\t"$11"\t"$12}' > happy_out.FPFN.vcf.50bp.bed
 
-# subtract FP/FN from GIAB confidence set
-bedtools subtract -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/dipcall_T2T_GRCh38/happy/happy_out.FPFN.vcf.50bp.bed > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/GIAB_T2T_Q100_conf_beds_concordant_50bp.bed
+# subtract FP/FN hap.py variants from GIAB confidence bed
+bedtools subtract -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/dipcall_T2T_GRCh38/happy_dipcall/happy_out.FPFN.vcf.50bp.bed > /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/GIAB_T2T_Q100_conf_beds_concordant_50bp.bed
 
-# count number of GIAB 4.2.1 variants that were subtracted
+# count number of GIAB 4.2.1 variants in the vcf that were subtracted
 bedtools intersect -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz -b /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed | wc -l
 # 3890596
 
 bedtools intersect -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/GIAB_T2T_Q100_conf_beds_concordant_50bp.bed | wc -l
-# 3873818
+# 3889759
 
-16778 variants are subtracted
+# 3890596 - 3889759 = 837 variants are subtracted
+
+bedtools subtract -header -a /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz -b /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/GIAB_T2T_Q100_conf_beds_concordant_50bp.bed | bedtools intersect -a - -b /private/groups/patenlab/mira/data/GRCh38_stratifications_v3.3/SegmentalDuplications/GRCh38_segdups.bed | wc -l
 ```
