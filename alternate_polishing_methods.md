@@ -448,7 +448,7 @@ Run merfin
 
 ```
 {
-  "runMerfin.readmerDBTarball": "/private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs//private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.meryl.tar",
+  "runMerfin.readmerDBTarball": /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.meryl.tar",
   "runMerfin.Merfin.mode": "-polish",
   "runMerfin.Merfin.vcfFile": "/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_MERGED_SMALL_VARIANTS.vcf.gz",
   "runMerfin.Merfin.refFasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa"
@@ -492,6 +492,49 @@ time toil-wdl-runner \
     --disableProgress \
     --logDebug \
     2>&1 | tee log.txt
+```
+
+Manually run merfin to debug segfault error
+```
+cd /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual
+
+docker run --rm -u `id -u`:`id -g` \
+  -v "/private/groups/patenlab/mira":"/private/groups/patenlab/mira" \
+  juklucas/hpp_merqury:latest \
+  meryl histogram /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.meryl > meryl.hist
+
+docker run -it --rm -v /private/groups:/private/groups dmolik/genomescope2:latest xvfb-run /home/genomics/genomescope2.0/genomescope.R -i /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/meryl.hist -k 21 -o /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/genomescope_outfiles -p 1 --fitted_hist &> genomescope.stdout
+
+    GenomeScope analyzing /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/meryl.hist p=1 k=21 outdir=genomescope_outfiles
+
+
+    a:100%
+    Model converged het:0 kcov:44.9 err:0.00548 model fit:1.59 len:2878576465
+```
+
+Run merfin
+```
+#!/bin/bash
+#SBATCH --job-name=merfin_HG005
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --threads-per-core=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=1:00:00
+
+docker run -it -v /private/groups:/private/groups \
+    miramastoras/merfin:latest \
+    merfin -polish  \
+    -vcf /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_MERGED_SMALL_VARIANTS.vcf.gz \
+    -threads 32 \
+    -sequence /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    -readmers /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.meryl \
+    -prob /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/genomescope_outfiles/lookup_table.txt \
+    -peak 44.9 \
+    -output /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_MERGED_SMALL_VARIANTS.merfin
 ```
 
 ### 2. DeepVariant polishing on winnowmap HiFi alignments

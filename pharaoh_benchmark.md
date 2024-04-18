@@ -1,19 +1,7 @@
 ### Benchmarking performance of PHARAOH pipeline
 
-Running DeepPolisher on minimap2 alignments
-
 HG002
-```
-{
-  "runDeepPolisher.sampleName": "HG002",
-  "runDeepPolisher.ModelFilesTarGZ": "/private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-665.tar.gz",
-  "runDeepPolisher.Bai": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/HiFi_DCv1.2_minimap2_all2diploid/toil_hifi_dv1.2_mm2_all2dip_out/HG002.DCv1.2.minimap2v2.26.bam.bai",
-  "runDeepPolisher.useOptimalGQFilter": true,
-  "runDeepPolisher.Fasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa",
-  "runDeepPolisher.dockerImage": "google/deepconsensus:polisher_v0.0.8_12122023",
-  "runDeepPolisher.Bam": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/HiFi_DCv1.2_minimap2_all2diploid/toil_hifi_dv1.2_mm2_all2dip_out/HG002.DCv1.2.minimap2v2.26.bam"
-}
-```
+
 Remove reads with de > 0.02
 ```
 java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/correct_bam.wdl
@@ -55,6 +43,19 @@ time toil-wdl-runner \
     --logDebug \
     2>&1 | tee log.txt
 ```
+Running DeepPolisher on minimap2 alignments
+
+```
+{
+  "runDeepPolisher.sampleName": "HG002",
+  "runDeepPolisher.ModelFilesTarGZ": "/private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-665.tar.gz",
+  "runDeepPolisher.Bai": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/HiFi_DCv1.2_minimap2_all2diploid/correct_bam/correct_bam_outfiles/HG002.DCv1.2.minimap2v2.26.maxDiv.02.bam.bai",
+  "runDeepPolisher.useOptimalGQFilter": true,
+  "runDeepPolisher.Fasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa",
+  "runDeepPolisher.dockerImage": "google/deepconsensus:polisher_v0.0.8_12122023",
+  "runDeepPolisher.Bam": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/HiFi_DCv1.2_minimap2_all2diploid/correct_bam/correct_bam_outfiles/HG002.DCv1.2.minimap2v2.26.maxDiv.02.bam"
+}
+```
 
 Run DeepPolisher
 ```
@@ -62,7 +63,7 @@ cd /private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/HG002_
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
 export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=7-00:00 --partition=long"
+export TOIL_SLURM_ARGS="--time=7-00:00 --partition=high_priority"
 export TOIL_COORDINATION_DIR=/data/tmp
 
 mkdir -p toil_logs
@@ -80,6 +81,7 @@ time toil-wdl-runner \
     --runLocalJobsOnWorkers \
     --retryCount 1 \
     --disableProgress \
+    --restart \
     --logDebug \
     2>&1 | tee log.txt
 ```
@@ -183,6 +185,7 @@ time toil-wdl-runner \
     --retryCount 1 \
     --disableProgress \
     --logDebug \
+    --restart \
     2>&1 | tee log.txt
 ```
 
@@ -192,11 +195,11 @@ Run DeepPolisher
 {
   "runDeepPolisher.sampleName": "HG005",
   "runDeepPolisher.ModelFilesTarGZ": "/private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-665.tar.gz",
-  "runDeepPolisher.Bai": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/long_read_aligner_scattered_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.bam.bai",
+  "runDeepPolisher.Bai": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/correct_bam/correct_bam_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.maxDiv.02.bam.bai",
   "runDeepPolisher.useOptimalGQFilter": true,
   "runDeepPolisher.Fasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa",
   "runDeepPolisher.dockerImage": "google/deepconsensus:polisher_v0.0.8_12122023",
-  "runDeepPolisher.Bam": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/long_read_aligner_scattered_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.bam"
+  "runDeepPolisher.Bam": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/correct_bam/correct_bam_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.maxDiv.02.bam"
 }
 ```
 
@@ -206,7 +209,7 @@ cd /private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/HG005_
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
 export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=7-00:00 --partition=long"
+export TOIL_SLURM_ARGS="--time=7-00:00 --partition=high_priority"
 export TOIL_COORDINATION_DIR=/data/tmp
 
 mkdir -p toil_logs
@@ -225,5 +228,8 @@ time toil-wdl-runner \
     --retryCount 1 \
     --disableProgress \
     --logDebug \
+    --restart \
     2>&1 | tee log.txt
 ```
+
+clush -w phoenix-[00-09,11-20] "rm -rvf /data/tmp/mmastora/"
