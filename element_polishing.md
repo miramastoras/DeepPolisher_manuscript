@@ -579,3 +579,53 @@ samtools sort -@32 /private/groups/patenlab/mira/hprc_polishing/element_polishin
 
 samtools index /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_mat/HG002.50x_element_google_mat.hprc_polished.srt.bam
 ```
+Remove reads with divergence > 0.04
+```
+java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/correct_bam.wdl
+```
+
+```
+{
+  "runCorrectBam.correctBam.dockerImage": "mobinasri/secphase:dev-v0.2.0-hom",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_mat/HG002.50x_element_google_mat.hprc_polished.srt.bam",
+  "runCorrectBam.correctBam.options": "--maxDiv 0.04 --minReadLen 0 --minAlignmentLen 0",
+  "runCorrectBam.correctBam.suffix": "maxDiv.04"
+}
+```
+```
+{
+  "runCorrectBam.correctBam.dockerImage": "mobinasri/secphase:dev-v0.2.0-hom",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_pat/HG002.50x_element_google_pat.hprc_polished.srt.bam",
+  "runCorrectBam.correctBam.options": "--maxDiv 0.04 --minReadLen 0 --minAlignmentLen 0",
+  "runCorrectBam.correctBam.suffix": "maxDiv.04"
+}
+```
+
+```
+cd /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_pat/correct_bam
+/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_mat/correct_bam
+
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=24:00:00 --partition=high_priority"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/correct_bam.wdl \
+    correct_bam_inputs.json \
+    --outputDirectory ./correct_bam_outfiles \
+    --outputFile correct_bam_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
