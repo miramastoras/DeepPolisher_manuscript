@@ -451,9 +451,9 @@ Run merfin
   "runMerfin.readmerDBTarball": /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.v2.meryl.tar.gz",
   "runMerfin.Merfin.mode": "-polish",
   "runMerfin.Merfin.vcfFile": "/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_MERGED_SMALL_VARIANTS.vcf.gz",
-  "runMerfin.Merfin.refFasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa"
+  "runMerfin.Merfin.refFasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa",
+  "runMerfin.Merfin.memSizeGB": 256,
 }
-
 ```
 
 ```
@@ -501,7 +501,7 @@ cd /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG00
 docker run --rm -u `id -u`:`id -g` \
   -v "/private/groups/patenlab/mira":"/private/groups/patenlab/mira" \
   juklucas/hpp_merqury:latest \
-  meryl histogram /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.meryl > meryl.hist
+  meryl histogram /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.v2.meryl > meryl.hist
 
 docker run -it --rm -v /private/groups:/private/groups dmolik/genomescope2:latest xvfb-run /home/genomics/genomescope2.0/genomescope.R -i /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/meryl.hist -k 21 -o /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/genomescope_outfiles -p 1 --fitted_hist &> genomescope.stdout
 
@@ -528,13 +528,13 @@ Filter variants with merfin before merge, then merge
 docker run -it --rm -v /private/groups:/private/groups \
     miramastoras/merfin:latest \
     merfin -polish  \
-    -vcf /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_deepvariant.filtered.vcf.gz \
+    -vcf /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_MERGED_SMALL_VARIANTS.vcf.gz \
     -threads 32 \
     -sequence /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
-    -readmers /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.meryl \
+    -readmers /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.v2.meryl \
     -prob /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/genomescope_outfiles/lookup_table.txt \
     -peak 44.9 \
-    -output /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/HG005_deepvariant.filtered.merfin
+    -output /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/HG005_MERGED_SMALL_VARIANTS.merfin
 ```
 Try merfin with k=31 database
 ```
@@ -600,6 +600,17 @@ Regenerate k=21 HG002 meryl db for merfin
 export PATH=/private/home/mmastora/progs/meryl-1.4.1/bin:$PATH
 
 meryl count threads=16 k=21 /private/groups/patenlab/mira/hprc_polishing/data/reads/HG005/illumina/HG005.ilm.fastq.gz output /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.v2.meryl
+```
+
+test merfin with hg2 meryl db
+```
+{
+  "runMerfin.readmerDBTarball": "/private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y1_terra_tables/meryl_dbs/ilm.k21.meryl.tar",
+  "runMerfin.Merfin.mode": "-polish",
+  "runMerfin.Merfin.vcfFile": "/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_MERGED_SMALL_VARIANTS.vcf.gz",
+  "runMerfin.Merfin.refFasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa",
+  "runMerfin.Merfin.memSizeGB": 256,
+}
 ```
 ### 2. DeepVariant polishing on winnowmap HiFi alignments
 

@@ -252,18 +252,14 @@ Run dipcall
 ```sh
 cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/dipcall_Q100_GRCh38_decoys_z2k
 
-export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
-export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=4:00:00 --partition=high_priority"
-export TOIL_COORDINATION_DIR=/data/tmp
-
 mkdir -p toil_logs
 
 time toil-wdl-runner \
     --jobStore ./jobstore \
     --stats \
     --clean=never \
-    --batchSystem slurm \
+    --batchSystem single_machine \
+    --maxCores 32 \
     --batchLogsDir ./toil_logs \
     /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/dipcall.z2k.wdl \
     dipcall_inputs.json \
@@ -294,18 +290,14 @@ Run dipcall
 ```sh
 cd /private/groups/patenlab/mira/hprc_polishing/GIAB_T2T_truthset_testing/dipcall_Q100_GRCh38_z2k
 
-export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
-export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=4:00:00 --partition=high_priority"
-export TOIL_COORDINATION_DIR=/data/tmp
-
 mkdir -p toil_logs
 
 time toil-wdl-runner \
     --jobStore ./jobstore \
     --stats \
     --clean=never \
-    --batchSystem slurm \
+    --batchSystem single_machine \
+    --maxCores 32 \
     --batchLogsDir ./toil_logs \
     /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/dipcall.z2k.wdl \
     dipcall_inputs.json \
@@ -315,5 +307,6 @@ time toil-wdl-runner \
     --retryCount 1 \
     --disableProgress \
     --logDebug \
+    --restart \
     2>&1 | tee log.txt
 ```
