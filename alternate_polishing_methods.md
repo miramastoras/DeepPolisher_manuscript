@@ -612,6 +612,24 @@ test merfin with hg2 meryl db
   "runMerfin.Merfin.memSizeGB": 256,
 }
 ```
+
+Downsample HG005 ilm  bamfile for meryl and yak dbs
+```
+#!/bin/bash
+#SBATCH --job-name=downsampling_HG005_ilm
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+# 50x to 30x
+samtools view -s 0.6 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.50x.all_to_mat.trio_hifiasm_0.19.5.DC_1.2_40x.srt.bam > /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.50x.all_to_mat.trio_hifiasm_0.19.5.DC_1.2_40x.srt.downsampled_30x.bam
+```
+
 ### 2. DeepVariant polishing on winnowmap HiFi alignments
 
 HG002
