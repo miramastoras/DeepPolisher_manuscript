@@ -688,23 +688,26 @@ time docker run \
 Filter variants by GQ7 and extract just homalt variants
 
 ```
-bcftools view -Oz -f "PASS" -e 'FORMAT/GQ<=7' /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.vcf > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.vcf
+bcftools view -Oz -f "PASS" -e 'FORMAT/GQ<=7' /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.vcf > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.GQ7.vcf.gz
 
 bcftools view -Oz -f "PASS" -e 'FORMAT/GQ<=7' /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.pat.vcf > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.pat.GQ7.vcf.gz
 
 # Maternal
-zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.vcf.gz | grep "^#" > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf
+zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.GQ7.vcf.gz | grep "^#" > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf
 
-zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.vcf.gz | grep -v "^#" | grep "1/1" >> /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf
+zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.GQ7.vcf.gz | grep -v "^#" | grep "1/1" >> /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf
 
-bcftools stats /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf | head -n 30
-# SN	0	number of records:	2194
+bcftools stats /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.mat.GQ7.homalt.vcf | head -n 30
+# SN	0	number of records:	3276
 
 # Paternal
-zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.vcf.gz | grep "^#" > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf
+zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.pat.GQ7.vcf.gz | grep "^#" > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf
 
-zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.vcf.gz | grep -v "^#" | grep "1/1" >> /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf
+zcat /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.pat.GQ7.vcf.gz | grep -v "^#" | grep "1/1" >> /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf
 
-bcftools stats /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf | head -n 30
-# 2987 records
+bcftools stats /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/deepvariant/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/google_50x/deepvariant_1.6.WGS.pat.GQ7.homalt.vcf | head -n 30
+# 2310 records
 ```
+### 3. Polish with element homalt GQ7 variants, run evaluation
+
+located under phoenix batch submissions github: https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/applyPolish_dipcall_happy/GIAB_samples_manuscript
