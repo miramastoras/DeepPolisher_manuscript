@@ -63,8 +63,9 @@ RG:Z:HG002.trio_hifiasm_0.19.5.DC_1.2_40x.R1041_Dorado_v0.1.1_43x_alignment.mini
 
 docker run -u `id -u`:`id -g` \
     -v /private/groups:/private/groups \
+    google/deepconsensus:polisher_v0.2.0_04172024 \
     time polisher make_images \
-    --bam /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/merged_hybrid_bam/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam \
+    --bam /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/add_PL_tag/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam \
     --fasta /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
     --output /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/DeepPolisher/HG002_y2_mm2_DCv1.2_R10_Dorado_hybrid_model2/images/images \
     --cpus 64 \
@@ -75,11 +76,12 @@ docker run -u `id -u`:`id -g` \
 # Inference on images to generate VCFs
 docker run -u `id -u`:`id -g` \
     -v /private/groups:/private/groups \
+    google/deepconsensus:polisher_v0.2.0_04172024 \
     time polisher inference \
     --input_dir images \
     --out_dir /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/DeepPolisher/HG002_y2_mm2_DCv1.2_R10_Dorado_hybrid_model2/vcf/ \
     --checkpoint /private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-226.tar.gz \
     --reference_file /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
     --sample_name HG002 \
-    --cpus 32
+    --cpus 64
 ```
