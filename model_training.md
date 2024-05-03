@@ -95,6 +95,31 @@ toil clean ${LOCAL_FOLDER}/jobstore
 
 ```
 
+```
+grep "total_reads" sample_all.report.tsv > coverage_per_file.tsv
+grep "N50" sample_all.report.tsv | paste -d "\t" coverage_per_file.tsv - > tmp; mv tmp coverage_per_file.tsv
+awk '{ print $1"\t"$3*$6 / 3000000000 }' coverage_per_file.tsv
+
+
+m64011_190830_220126.Q20.fastq	8.80676
+m64011_190901_095311.Q20.fastq	8.3522
+m64012_190920_173625.Q20.fastq	9.81073
+m64012_190921_234837.Q20.fastq	9.98385
+m64015_190920_185703.Q20.fastq	9.50113
+m64015_190922_010918.Q20.fastq	9.10393
+sample.fastq	53.0788
+
+
+Selecting these files for 45x coverage
+m64015_190920_185703.Q20.fastq	9.50113
+m64015_190922_010918.Q20.fastq	9.10393
+m64011_190830_220126.Q20.fastq	8.80676
+m64011_190901_095311.Q20.fastq	8.3522
+m64012_190920_173625.Q20.fastq	9.81073
+```
+
+Run hprc_DeepPolisher with minimap2 DCv1.2 model
+
 
 Download HG005 data
 ```
@@ -139,7 +164,7 @@ Check read coverage for HG002 data
 #SBATCH --output=%x.%j.log
 #SBATCH --time=12:00:00
 
-cd /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS
+cd /private/groups/patenlab/mira/hprc_polishing/data/reads/HG005/HiFi_Sequel2_CCS
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
 export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
@@ -156,9 +181,9 @@ toil-wdl-runner \
     --maxCores 32 \
     --batchLogsDir /private/groups/patenlab/mira/WashU_pedigree/data/read_stats/HiFi_DCv1.2/toil_logs \
     ~/progs/master_hpp_production_workflows/QC/wdl/tasks/read_stats.wdl \
-    /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS/read_stats.inputs.json  \
-    --outputDirectory /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS/outputs \
-    --outputFile /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS/outputs.json \
+    /private/groups/patenlab/mira/hprc_polishing/data/reads/HG005/HiFi_Sequel2_CCS/read_stats.inputs.json  \
+    --outputDirectory /private/groups/patenlab/mira/hprc_polishing/data/reads/HG005/HiFi_Sequel2_CCS/outputs \
+    --outputFile /private/groups/patenlab/mira/hprc_polishing/data/reads/HG005/HiFi_Sequel2_CCS/outputs.json \
     --runLocalJobsOnWorkers \
     --retryCount 1 \
     --disableProgress \
@@ -167,6 +192,33 @@ toil-wdl-runner \
 toil clean ${LOCAL_FOLDER}/jobstore
 ```
 
+```
+grep "total_reads" sample_all.report.tsv > coverage_per_file.tsv
+grep "N50" sample_all.report.tsv | paste -d "\t" coverage_per_file.tsv - > tmp; mv tmp coverage_per_file.tsv
+awk '{ print $1"\t"$3*$6 / 3000000000 }' coverage_per_file.tsv
+
+
+m64017_200723_190224.fastq	6.59322
+m64017_200730_190124.fastq	6.69309
+m64017_200801_011415.fastq	5.57823
+m64017_200802_073944.fastq	4.31361
+m64109_200304_195708.fastq	8.82954
+m64109_200309_192110.fastq	8.58724
+m64109_200311_013444.fastq	8.11014
+sample.fastq	48.3507
+
+m64017_200723_190224.fastq	6.59322
+m64017_200730_190124.fastq	6.69309
+m64017_200802_073944.fastq	4.31361
+m64109_200304_195708.fastq	8.82954
+m64109_200309_192110.fastq	8.58724
+m64109_200311_013444.fastq	8.11014
+
+42 x coverage
+
+```
+
+DeepPolisher submitted in batch: https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/hprc_DeepPolisher/GIAB_samples_manuscript
 
 #### Sequel - DCv1.1
 
