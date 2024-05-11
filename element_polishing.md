@@ -171,3 +171,5 @@ bcftools stats /private/groups/patenlab/mira/hprc_polishing/element_polishing/De
 ### 3. Polish with element homalt GQ7 variants, run evaluation
 
 located under phoenix batch submissions github: https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/applyPolish_dipcall_happy/GIAB_samples_manuscript
+
+### 4. Investigate missing variants 

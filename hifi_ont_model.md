@@ -144,3 +144,95 @@ docker run -u `id -u`:`id -g` \
     --sample_name HG002 \
     --cpus 64
 ```
+
+### Testing polishing in just hifi coverage dropouts regions
+
+1. run mosdepth quantize on HiFi bam
+
+```
+#!/bin/bash
+#SBATCH --job-name=HG002_mosdepth
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=short
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=4
+#SBATCH --output=%x.%j.log
+#SBATCH --time=1:00:00
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/:/opt/mount \
+    quay.io/biocontainers/mosdepth:0.2.4--he527e40_0 \
+    mosdepth --threads 4 \
+    -f /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    --quantize 0:1:10:150: \
+    /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quantized \
+    /private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/HG002_y2_DCv1.2_mm2_PHARAOH_whatshap/toil_hprc_pipeline_out/HG002_y2_DCv1.2_PHARAOH_minimap_alignments/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.minimap2v2.26.PHARAOH.bam
+
+zcat /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quantized.quantized.bed.gz | awk '{FS=OFS="\t"}{print $0, ($3-$2)}' > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quantized.tsv
+
+awk 'BEGIN {FS=OFS="\t"} {
+        if ($4 == "0:1") {
+            $4 = "NO_COVERAGE"
+        } else if ($4 == "1:10") {
+            $4 = "LOW_COVERAGE"
+        } else if ($4 == "10:150") {
+            $4 = "CALLABLE"
+        } else if ($4 == "150:inf") {
+            $4 = "HIGH_COVERAGE"
+        }
+        print }' /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quantized.tsv > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.bed
+
+```
+
+2. extract only "no coverage" regions
+```
+grep NO_COVERAGE /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.bed | bedtools merge -i - > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.bed
+```
+
+3. Subset hybrid bam file to only those regions
+```
+bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/add_PL_tag/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam -b /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.bed > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.bam
+```
+4. run hybrid polisher model
+
+```
+#!/bin/bash
+#SBATCH --job-name=DP-hybrid_model2_no_hifi_cov
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=64
+#SBATCH --output=%x.%j.log
+#SBATCH --exclude=phoenix-[09,10,22,23,24]
+#SBATCH --time=7-00:00
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    google/deepconsensus:polisher_v0.2.0_04172024 \
+    polisher make_images \
+    --bam /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.bam \
+    --fasta /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    --output /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_10_2024/images/images \
+    --cpus 64 \
+    --use_pl_tags \
+    --pl_tag_height 30 \
+    --pl_tag_order pacbio,ont
+
+# Inference on images to generate VCFs
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    google/deepconsensus:polisher_v0.2.0_04172024 \
+    polisher inference \
+    --input_dir /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_10_2024/images/ \
+    --out_dir /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_10_2024/vcf/ \
+    --checkpoint /private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-226/checkpoint-226 \
+    --reference_file /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    --sample_name HG002 \
+    --cpus 64
+```
+5. combine vcf files and polish
