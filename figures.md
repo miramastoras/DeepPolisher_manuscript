@@ -140,15 +140,15 @@ mkdir -p ./annotate_fp_kmers/${sample}
 ###  whole genome
 
 # get total FP kmers
-tar -zxvf ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/${sample}.polished.merqury.tar.gz -C ./annotate_fp_kmers/${sample}/
+tar -zxvf ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/*.polished.merqury.tar.gz -C ./annotate_fp_kmers/${sample}/
 
-total_fp_kmers=`cat ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.altHap_only.bed ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.asm_only.bed | wc -l`
+total_fp_kmers=`cat ./annotate_fp_kmers/${sample}/*.polished.merqury.altHap_only.bed ./annotate_fp_kmers/${sample}/*.polished.merqury.asm_only.bed | wc -l`
 
 # get # FP kmers projectable to raw
-projected_fp_kmers=`cat ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/${sample}_hap1.hap1PolToRaw_asm_only.projection.bed ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/${sample}_hap2.hap2PolToRaw_altHap_only.projection.bed | awk '{sum+=$4;} END{print sum;}'`
+projected_fp_kmers=`cat ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/*hap1PolToRaw_asm_only.projection.bed ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/*hap2PolToRaw_altHap_only.projection.bed | awk '{sum+=$4;} END{print sum;}'`
 
 # merge haplotype projected files
-cat ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/${sample}_hap1.hap1PolToRaw_asm_only.projection.bed ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/${sample}_hap2.hap2PolToRaw_altHap_only.projection.bed > ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.bed
+cat ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/*hap1PolToRaw_asm_only.projection.bed ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/*hap2PolToRaw_altHap_only.projection.bed > ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.bed
 
 # get FP kmer blocks induced by polishing, whole genome
 
