@@ -352,24 +352,6 @@ time toil-wdl-runner \
 
 **HiFi winnowmap alignments**
 
-Downsample alignment to 40x
-```
-#!/bin/bash
-#SBATCH --job-name=downsampling_40x_HG005
-#SBATCH --mail-type=FAIL,END
-#SBATCH --partition=medium
-#SBATCH --mail-user=mmastora@ucsc.edu
-#SBATCH --nodes=1
-#SBATCH --mem=128gb
-#SBATCH --cpus-per-task=32
-#SBATCH --output=%x.%j.log
-#SBATCH --time=12:00:00
-
-samtools view -s 0.66 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_60x/HG005.DCv1.2.60x.winnowmapv2.03.bam > /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_40x/HG005.DCv1.2.40x.winnowmapv2.03.bam
-
-samtools index /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_40x/HG005.DCv1.2.40x.winnowmapv2.03.bam
-```
-
 
 Merge HiFi and illumina bam files
 ```
@@ -385,7 +367,7 @@ Merge HiFi and illumina bam files
 
 
 samtools merge -@32 \
-    /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/hybrid_hifi_ilm/HG005.trio_hifiasm_0.19.5.DC_1.2.diploid.DC_1.2_40x.winnowmap_2.03.Bwa.HiSeq_20x_hybrid.bam /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_40x/HG005.DCv1.2.40x.winnowmapv2.03.bam \
+    /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/hybrid_hifi_ilm/HG005.trio_hifiasm_0.19.5.DC_1.2.diploid.DC_1.2_40x.winnowmap_2.03.Bwa.HiSeq_20x_hybrid.bam /private/groups/patenlab/masri/hprc/polishing/HG005/HPRC_Y2/trio_hifiasm_0.19.5_DC_1.2/DC_1.2_alignments/diploid/slurm_run/HG005.diploid.trio_hifiasm_0.19.5.DC_1.2.winnowmap_2.03.DC_1.2_40x.bam \
     /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_dip/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.ilm.bwa.srt.bam
 ```
 **Run SNV indel assembly wdl for variant calling**
@@ -414,6 +396,7 @@ samtools merge -@32 \
 #SBATCH --mem=16gb
 #SBATCH --time=72:00:00
 #SBATCH --partition=long
+#SBATCH --exclude=phoenix-[09,10,22,23,24]
 #SBATCH --output=slurm_logs/submission_%x_%j_%A_%a.log
 
 
@@ -738,12 +721,12 @@ HG005
 
 BIN_VERSION="1.6.1"
 docker run -u `id -u`:`id -g` \
-  -v "/private/groups/patenlab/mira":"/private/groups/patenlab/mira" \
+  -v "/private/groups/":"/private/groups/" \
   google/deepvariant:"${BIN_VERSION}" \
   /opt/deepvariant/bin/run_deepvariant \
   --model_type=PACBIO \
   --ref=/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
-  --reads=/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_40x/HG005.DCv1.2.40x.winnowmapv2.03.bam \
+  --reads=/private/groups/patenlab/masri/hprc/polishing/HG005/HPRC_Y2/trio_hifiasm_0.19.5_DC_1.2/DC_1.2_alignments/diploid/slurm_run/HG005.diploid.trio_hifiasm_0.19.5.DC_1.2.winnowmap_2.03.DC_1.2_40x.bam \
   --output_vcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_winnowmap_DV/HG005.dip.y2_hifiasm_0.19.5.DC_1.2.40x.HiFi_winnowmap.deepvariant.vcf.gz \
   --output_gvcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_winnowmap_DV/HG005.dip.y2_hifiasm_0.19.5.DC_1.2.40x.HiFi_winnowmap.deepvariant.gvcf.gz \
   --num_shards=32
@@ -758,7 +741,7 @@ bcftools view -Oz -f "PASS" /private/groups/patenlab/mira/hprc_polishing/y2_alt_
 Get count of homalt polishing variants
 ```
 zcat /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_winnowmap_DV/HG005.dip.y2_hifiasm_0.19.5.DC_1.2.40x.HiFi_winnowmap.deepvariant.PASS.vcf.gz | grep -v "^#" | grep "1/1" | wc -l
-# 56602
+# 17210
 
 zcat /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_winnowmap_DV/HG002.dip.y2_hifiasm_0.19.5.DC_1.2.HiFi_winnowmap.deepvariant.PASS.vcf.gz | grep -v "^#" | grep "1/1" | wc -l
 
@@ -910,9 +893,10 @@ Run nextpolish2 on HG005
 #SBATCH --output=%x.%j.log
 #SBATCH --time=12:00:00
 
+source /private/home/mmastora/progs/miniconda3/etc/profile.d/conda.sh
 conda activate nextpolish
 
-time nextPolish2 -t 32 /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_40x/HG005.DCv1.2.40x.winnowmapv2.03.bam /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/yak_files/HG005.k21.yak /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/yak_files/HG005.k31.yak > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/nextpolish2/HG005_y2_winnowmap_HiFi/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.NP2.polished.fa
+time nextPolish2 -t 32 /private/groups/patenlab/masri/hprc/polishing/HG005/HPRC_Y2/trio_hifiasm_0.19.5_DC_1.2/DC_1.2_alignments/diploid/slurm_run/HG005.diploid.trio_hifiasm_0.19.5.DC_1.2.winnowmap_2.03.DC_1.2_40x.bam /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/yak_files/HG005.k21.yak /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/yak_files/HG005.k31.yak > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/nextpolish2/HG005_y2_winnowmap_HiFi/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.NP2.polished.fa
 ```
 
 Separate by Haplotype
@@ -942,7 +926,7 @@ cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
 export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium"
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium --exclude=phoenix-[09,10,22,23,24]"
 export TOIL_COORDINATION_DIR=/data/tmp
 
 mkdir -p toil_logs
