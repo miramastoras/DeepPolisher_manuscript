@@ -4,7 +4,13 @@ Combine HG002 and HG005 hap FP kmer bedfiles from merqury to use
 ```
 cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.altHap_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.asm_only.bed | bedtools sort -i - | bedtools merge -i - -c 1 -o count > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed
 
+cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.insideConf.subBed.merqury.altHap_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.insideConf.subBed.merqury.asm_only.bed > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.insideConf.subBed.merqury.dip.bed
+
+cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.outsideConf.subBed.merqury.altHap_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.outsideConf.subBed.merqury.asm_only.bed > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.outsideConf.subBed.merqury.dip.bed
+
 cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.asm_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.altHap_only.bed | bedtools sort -i - | bedtools merge -i - -c 1 -o count > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed
+
+cat
 ```
 
 project inside and outside conf regions to raw assemblies
@@ -150,14 +156,6 @@ projected_fp_kmers=`cat ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/*h
 # merge haplotype projected files
 cat ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/*hap1PolToRaw_asm_only.projection.bed ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/*hap2PolToRaw_altHap_only.projection.bed > ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.bed
 
-# get FP kmer blocks induced by polishing, whole genome
-
-fp_kmers_induced_wg=`bedtools subtract -f 1 \
-    -a ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.bed \
-    -b ${raw_asm_fp_kmers} \
-    -A | sort | uniq | awk '{sum+=$4;} END{print sum;}'`
-
-
 # get FP kmer blocks unchanged by polishing
 fp_kmers_unchanged_wg=`bedtools intersect -f 1 \
     -a ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.bed \
@@ -166,22 +164,17 @@ fp_kmers_unchanged_wg=`bedtools intersect -f 1 \
 
 ###  inside conf
 
-# subset FP kmers polished projected to confidence regions  
+# subset FP kmers polished projected to the confidence regions  
 bedtools intersect -f 1 -a ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.bed -b ${inside_conf} | sort | uniq > ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.insideConf.bed
 
-# get total FP kmers
+# subset total FP kmers
 tar -zxvf ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/Polished.insideConf.subBed.merqury.tar.gz -C ./annotate_fp_kmers/${sample}/
 
 total_fp_kmers_conf=`cat ./annotate_fp_kmers/${sample}/Polished.insideConf.subBed.merqury.altHap_only.bed ./annotate_fp_kmers/${sample}/Polished.insideConf.subBed.merqury.asm_only.bed | wc -l`
 
 # get projected FP kmers
-projected_fp_kmers_conf=`awk '{sum+=$4;} END{print sum;}' ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.insideConf.bed`
 
-# get FP kmer blocks induced by polishing, inside conf
-fp_kmers_induced_conf=`bedtools subtract -f 1 \
-    -a ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.insideConf.bed \
-    -b ${raw_asm_fp_kmers} \
-    -A | sort | uniq | awk '{sum+=$4;} END{print sum;}'`
+projected_fp_kmers_conf=`awk '{sum+=$4;} END{print sum;}' ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.insideConf.bed`
 
 # FP kmers unchanged by polishing, inside conf
 fp_kmers_unchanged_conf=`bedtools intersect -f 1 \
@@ -189,37 +182,13 @@ fp_kmers_unchanged_conf=`bedtools intersect -f 1 \
     -b ${raw_asm_fp_kmers} \
     | sort | uniq | awk '{sum+=$4;} END{print sum;}'`
 
-####  outside conf
-# subset FP kmers polished projected to confidence regions  
-bedtools intersect -f 1 -a ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.bed -b ${outside_conf} | sort | uniq > ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.outsideConf.bed
-
-# get total FP kmers
-tar -zxvf ${sample}/analysis/hprc_polishing_QC_no_meryl_outputs/Polished.outsideConf.subBed.merqury.tar.gz -C ./annotate_fp_kmers/${sample}/
-
-total_fp_kmers_outside_conf=`cat ./annotate_fp_kmers/${sample}/Polished.outsideConf.subBed.merqury.altHap_only.bed ./annotate_fp_kmers/${sample}/Polished.outsideConf.subBed.merqury.asm_only.bed | wc -l`
-
-# get projected FP kmers
-projected_fp_kmers_outside_conf=`awk '{sum+=$4;} END{print sum;}' ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.outsideConf.bed`
-
-# get FP kmer blocks induced by polishing, inside conf
-fp_kmers_induced_outside_conf=`bedtools subtract -f 1 \
-    -a ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.outsideConf.bed \
-    -b ${raw_asm_fp_kmers} \
-    -A | sort | uniq | awk '{sum+=$4;} END{print sum;}'`
-
-# FP kmers unchanged by polishing, inside conf
-fp_kmers_unchanged_outside_conf=`bedtools intersect -f 1 \
-    -a ./annotate_fp_kmers/${sample}/${sample}.polished.merqury.dip_only.outsideConf.bed \
-    -b ${raw_asm_fp_kmers} \
-    | sort | uniq | awk '{sum+=$4;} END{print sum;}'`
-
-echo ${sample},${total_fp_kmers},${projected_fp_kmers},${fp_kmers_induced_wg},${fp_kmers_unchanged_wg},${total_fp_kmers_conf},${projected_fp_kmers_conf},${fp_kmers_induced_conf},${fp_kmers_unchanged_conf},${total_fp_kmers_outside_conf},${projected_fp_kmers_outside_conf},${fp_kmers_induced_outside_conf},${fp_kmers_unchanged_outside_conf} >> ./annotate_fp_kmers/all_results.csv
+echo ${sample},${total_fp_kmers},${projected_fp_kmers},${fp_kmers_unchanged_wg},${total_fp_kmers_conf},${projected_fp_kmers_conf},${fp_kmers_unchanged_conf} >> ./annotate_fp_kmers/all_results.csv
 ```
 
 ```
 cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl
 
-echo "sample,total_fp_kmers_wg,projected_fp_kmers_wg,induced_fp_kmers_wg,unchanged_fp_kmers_wg,total_fp_kmers_conf,projected_fp_kmers_conf,induced_fp_kmers_conf,unchanged_fp_kmers_conf,total_fp_kmers_outsideconf,projected_fp_kmers_outsideconf,induced_fp_kmers_outsideconf,unchanged_fp_kmers_outsideconf" > ./annotate_fp_kmers/all_results.csv
+echo "sample,total_fp_kmers_wg,projected_fp_kmers_wg,unchanged_fp_kmers_wg,total_fp_kmers_conf,projected_fp_kmers_conf,unchanged_fp_kmers_conf" > ./annotate_fp_kmers/all_results.csv
 
 # HG002 samples
 for sample in HG002_nextPolish2 HG002_deepvariant HG002_y2_DCv1.2_PHv6_mm2_model1_dockerv0.8_HPRC_GQ HG002_t2t_polish
