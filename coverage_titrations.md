@@ -144,6 +144,11 @@ samtools view -s 0.25 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/d
 
 ### HG002
 
+samtools view -s 0.75 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/hifi_winnowmap/toil_winnow_full_cov_out/HG002.DCv1.2.full_coverage.winnowmapv2.03.bam >
+
+# 50x
+samtools view -s 0.625 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/hifi_winnowmap/toil_winnow_full_cov_out/HG002.DCv1.2.full_coverage.winnowmapv2.03.bam >
+
 New alignment of 60 and 50x files minimap2
 ```
 java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmastora/progs/flagger/wdls/workflows/long_read_aligner_scattered.wdl
@@ -160,7 +165,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
   "longReadAlignmentScattered.kmerSize": 19,
   "longReadAlignmentScattered.sampleName": "HG002",
   "longReadAlignmentScattered.suffix": "DCv1.2_60x.minimap2v2.26",
-  "longReadAlignmentScattered.readFiles": ["https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64109_200304_195708.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191218_164535.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64109_200309_192110.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191120_193948.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191202_204405.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_200112_090459.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191126_155613.dc.q20.fastq.gz"],
+  "longReadAlignmentScattered.readFiles": ["/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/hifi_winnowmap/downsampled_bams/HG002.DCv1.2.60x.winnowmapv2.03.bam"],
   "longReadAlignmentScattered.enableAddingMDTag": false
 }
 ```
@@ -176,7 +181,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
   "longReadAlignmentScattered.kmerSize": 19,
   "longReadAlignmentScattered.sampleName": "HG002",
   "longReadAlignmentScattered.suffix": "DCv1.2_50x.minimap2v2.26",
-  "longReadAlignmentScattered.readFiles": ["https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191126_155613.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191120_193948.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64109_200304_195708.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191205_225630.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191214_070352.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_200801_011415.dc.q20.fastq.gz"],
+  "longReadAlignmentScattered.readFiles": ["/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/hifi_winnowmap/downsampled_bams/HG002.DCv1.2.50x.winnowmapv2.03.bam"],
   "longReadAlignmentScattered.enableAddingMDTag": false
 }
 ```
@@ -184,7 +189,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
 
 ```
 #!/bin/bash
-#SBATCH --job-name=HG005_mm2_50x
+#SBATCH --job-name=HG002_mm2_50x
 #SBATCH --mail-type=FAIL,END
 #SBATCH --partition=high_priority
 #SBATCH --mail-user=mmastora@ucsc.edu
@@ -200,7 +205,7 @@ cd /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignmen
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
 export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=7-0:00 --partition=long --exclude=phoenix-[09,10,22,23,24]"
+export TOIL_SLURM_ARGS="--time=7-0:00 --partition=high_priority --exclude=phoenix-[09,10,22,23,24]"
 export TOIL_COORDINATION_DIR=/data/tmp
 
 mkdir -p toil_logs
@@ -227,11 +232,11 @@ Already have 30,20,10x bams. Submit to deepPolisher
 
 ### HG005
 
-Re-align 60 and 50x bam file from winnowmap with minimap2
 ```
 java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmastora/progs/flagger/wdls/workflows/long_read_aligner_scattered.wdl
 ```
 
+60x
 ```
 {
   "longReadAlignmentScattered.preset": "map-hifi",
@@ -242,7 +247,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
   "longReadAlignmentScattered.kmerSize": 19,
   "longReadAlignmentScattered.sampleName": "HG005",
   "longReadAlignmentScattered.suffix": "DCv1.2_60x.minimap2v2.26",
-  "longReadAlignmentScattered.readFiles": ["/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsample_60x/HG005.DCv1.2.60x.winnowmapv2.03.bam"],
+  "longReadAlignmentScattered.readFiles": ["https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64109_200304_195708.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191218_164535.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64109_200309_192110.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191120_193948.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191202_204405.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_200112_090459.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191126_155613.dc.q20.fastq.gz"],
   "longReadAlignmentScattered.enableAddingMDTag": false
 }
 ```
@@ -258,7 +263,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
   "longReadAlignmentScattered.kmerSize": 19,
   "longReadAlignmentScattered.sampleName": "HG005",
   "longReadAlignmentScattered.suffix": "DCv1.2_50x.minimap2v2.26",
-  "longReadAlignmentScattered.readFiles": ["/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_winnowmap/downsampled_bams/HG005.DCv1.2.50x.winnowmapv2.03.bam"],
+  "longReadAlignmentScattered.readFiles": ["https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191126_155613.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191120_193948.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64109_200304_195708.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191205_225630.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_191214_070352.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_200801_011415.dc.q20.fastq.gz"],
   "longReadAlignmentScattered.enableAddingMDTag": false
 }
 ```
@@ -301,7 +306,6 @@ time toil-wdl-runner \
     --retryCount 1 \
     --disableProgress \
     --logDebug \
-    --restart \
     2>&1 | tee log.txt
 ```
 

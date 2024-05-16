@@ -200,3 +200,10 @@ for sample in HG005_nextPolish2 HG005_deepvariant HG005_y2_DCv1.2_PHv6_mm2_model
     do bash annotate_fp_kmers/annotate_fp_kmers.sh ${sample} /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
     done
 ```
+
+https://genomeark.s3.amazonaws.com/index.html?prefix=species/Gorilla_gorilla/mGorGor1/genomic_data/pacbio_hifi/previous-versions/
+https://genomeark.s3.amazonaws.com/species/Pan_paniscus/mPanPan1/assembly_curated/mPanPan1.MT.cur.20231122.fasta.gz
+
+s3://genomeark/species/Gorilla_gorilla/mGorGor1/genomic_data/pacbio_hifi/m64076_210215_140546.hifi_reads.bam
+https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissions/
+https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissions/

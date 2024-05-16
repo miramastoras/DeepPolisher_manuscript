@@ -386,6 +386,8 @@ samtools merge -@32 \
 }
 ```
 
+
+
 ```
 #!/bin/bash            
 #SBATCH --job-name=HG005_t2t_polish
@@ -425,6 +427,55 @@ time toil-wdl-runner \
     --logDebug \
     --restart \
     2>&1 | tee log.txt
+```
+
+Run variant calling manually
+```
+#!/bin/bash
+#SBATCH --job-name=HG005_DV_hybrid
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=7-00:00
+
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+google/deepvariant:1.5.0 \
+/opt/deepvariant/bin/run_deepvariant \
+--model_type HYBRID_PACBIO_ILLUMINA \
+--ref /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+--reads /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/hybrid_hifi_ilm/HG005.trio_hifiasm_0.19.5.DC_1.2.diploid.DC_1.2_40x.winnowmap_2.03.Bwa.HiSeq_20x_hybrid.bam \
+--output_vcf /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_y2_hybrid.variants.vcf.gz \
+--num_shards 32 \
+--intermediate_results_dir /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/intermediate_results_dir
+```
+
+```
+#!/bin/bash
+#SBATCH --job-name=HG005_pmdv
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=7-00:00
+
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups:/private/groups \
+kishwars/pepper_deepvariant:r0.8 \
+run_pepper_margin_deepvariant call_variant \
+-b /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/UL_R941_Guppy6/all_to_diploid/long_read_aligner_scattered_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.R941_Guppy5.winnowmap.bam \
+-f /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+-o /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/ \
+-p HG005_y2_pmdv \
+-t 32 \
+--ont_r9_guppy5_sup
 ```
 
 Run merfin

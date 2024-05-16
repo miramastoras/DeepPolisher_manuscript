@@ -192,11 +192,17 @@ awk 'BEGIN {FS=OFS="\t"} {
 grep NO_COVERAGE /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.bed | bedtools merge -i - > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.bed
 ```
 
+Expand by 20,000 bp on each side of bed region
+```
+grep NO_COVERAGE /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.bed | awk '{print $1"\t"$2-20000"\t"$3+20000"\t"$6"\t"$7"\t"$10"\t"$11"\t"$12}' |  awk -vOFS='\t' '{for(i=1;i<=NF;i++)if($i<0)$i=0}1' | bedtools merge -i - > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.20kb.bed
+```
+
 3. Subset hybrid bam file to only those regions
 ```
-bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/add_PL_tag/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam -b /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.bed >
+bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/add_PL_tag/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam -b /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.bed > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.bam
 
-/private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.bam
+bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/add_PL_tag/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam -b /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.bed > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.20kb.bam
+
 ```
 4. run hybrid polisher model
 
@@ -217,7 +223,7 @@ docker run -u `id -u`:`id -g` \
     -v /private/groups:/private/groups \
     google/deepconsensus:polisher_v0.2.0_04172024 \
     polisher make_images \
-    --bam /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.bam\
+    --bam /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.20kb.bam \
     --fasta /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
     --output /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_10_2024/images/images \
     --cpus 64 \
@@ -239,4 +245,4 @@ docker run -u `id -u`:`id -g` \
 ```
 5. Subset vcf file to only the bed file of coverage dropouts - so no edits in parts of the reads that hifi touches
 
-6. polish with variants 
+6. polish with variants
