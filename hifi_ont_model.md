@@ -214,7 +214,7 @@ bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_
 #SBATCH --mail-user=mmastora@ucsc.edu
 #SBATCH --nodes=1
 #SBATCH --mem=256gb
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=32
 #SBATCH --output=%x.%j.log
 #SBATCH --exclude=phoenix-[09,10,22,23,24]
 #SBATCH --time=7-00:00
@@ -225,7 +225,7 @@ docker run -u `id -u`:`id -g` \
     polisher make_images \
     --bam /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.20kb.bam \
     --fasta /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
-    --output /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_10_2024/images/images \
+    --output /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_17_2024/images/images \
     --cpus 64 \
     --use_pl_tags \
     --pl_tag_height 30 \
@@ -236,12 +236,12 @@ docker run -u `id -u`:`id -g` \
     -v /private/groups:/private/groups \
     google/deepconsensus:polisher_v0.2.0_04172024 \
     polisher inference \
-    --input_dir /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_10_2024/images/ \
-    --out_dir /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_10_2024/vcf/ \
+    --input_dir /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_17_2024/images/ \
+    --out_dir /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/DeepPolisher/5_17_2024/vcf/ \
     --checkpoint /private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-226/checkpoint-226 \
     --reference_file /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
     --sample_name HG002 \
-    --cpus 64
+    --cpus 32
 ```
 5. Subset vcf file to only the bed file of coverage dropouts - so no edits in parts of the reads that hifi touches
 

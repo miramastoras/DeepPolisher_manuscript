@@ -195,6 +195,8 @@ ASM=/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_a
 # align element to polished assembly
 docker run -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira mobinasri/long_read_aligner:v0.3.3 minimap2 --cs --eqx -t 32 -ax sr ${ASM} /private/groups/patenlab/mira/hprc_polishing/data/element_HG002/HG002-20220606.grch38.bam.element.fq.gz | samtools view -b -h > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.bam
 
+samtools index /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.bam
+
 # sort files and index
 samtools sort -@32 /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.bam > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.srt.bam
 
@@ -271,4 +273,39 @@ time toil-wdl-runner \
     --disableProgress \
     --logDebug \
     2>&1 | tee log.txt
+```
+
+Run PHARAOH using 1000bp as the "homozygous" region length
+
+```
+java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/workflows/PHARAOH.wdl
+```
+
+```
+{
+  "PHARAOH.allHifiToDiploidBai": "File",
+  "PHARAOH.minWindowSizeBp": "1000",
+  "PHARAOH.extendBp": "50000",
+  "PHARAOH.allONTToHap2Bam": "File",
+  "PHARAOH.allONTToHap1Bam": "File",
+  "PHARAOH.diploidFaGz": "File",
+  "PHARAOH.Hap1Fasta": "File",
+  "PHARAOH.allONTToHap2Bai": "File",
+  "PHARAOH.Hap2Fasta": "File",
+  "PHARAOH.Hap1FastaIndex": "File",
+  "PHARAOH.allHifiToDiploidBam": "File",
+  "PHARAOH.allONTToHap1Bai": "File",
+  "PHARAOH.Hap2FastaIndex": "File",
+  "PHARAOH.sampleName": "String",
+  "PHARAOH.PharaohHiFiPreset": "sr",
+  "PHARAOH.alignAllToHap2Scattered.options": "--cs --eqx",
+  "PHARAOH.alignAllToHap1Scattered.options": "--cs --eqx",
+  "PHARAOH.subDipBamByHomozygous.threadCount": "Int (optional, default = 32)",
+  "PHARAOH.WhatsHapPhaseHap1.dockerImage": "String (optional, default = \"tpesout/whatshap:latest\")",
+  "PHARAOH.runSecPhase.secphaseOptions": "String (optional, default = \"--hifi\")",
+  "PHARAOH.correctBamMaxDivergenceHap2.mapqTableText": "File? (optional)",
+  "PHARAOH.correctBamMaxDivergenceHap1.preemptible": "Int (optional, default = 2)",
+  "PHARAOH.correctBamMaxDivergenceHap2.memSize": "Int (optional, default = 8)",
+  "PHARAOH.DeepVariantHap1.threadCount": "Int (optional, default = 32)"
+}
 ```

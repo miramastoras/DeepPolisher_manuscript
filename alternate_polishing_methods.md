@@ -429,7 +429,7 @@ time toil-wdl-runner \
     2>&1 | tee log.txt
 ```
 
-Run variant calling manually
+Had to rerun hybrid variant calling manually with updated DCv1.2 dataset  
 ```
 #!/bin/bash
 #SBATCH --job-name=HG005_DV_hybrid
@@ -454,28 +454,46 @@ google/deepvariant:1.5.0 \
 --intermediate_results_dir /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/intermediate_results_dir
 ```
 
+Merge variant callsets
 ```
-#!/bin/bash
-#SBATCH --job-name=HG005_pmdv
-#SBATCH --mail-type=FAIL,END
-#SBATCH --partition=high_priority
-#SBATCH --mail-user=mmastora@ucsc.edu
-#SBATCH --nodes=1
-#SBATCH --mem=256gb
-#SBATCH --cpus-per-task=32
-#SBATCH --output=%x.%j.log
-#SBATCH --time=7-00:00
+# filter new hybrid callset
+bcftools view -f "PASS" -e 'FORMAT/VAF<=0.5 | FORMAT/GQ<=30' -Oz /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_y2_hybrid.variants.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_y2_hybrid.variants.filtered.vcf.gz
+
+# merge with PMDV callset
 
 docker run --rm -u `id -u`:`id -g` \
--v /private/groups:/private/groups \
-kishwars/pepper_deepvariant:r0.8 \
-run_pepper_margin_deepvariant call_variant \
--b /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/UL_R941_Guppy6/all_to_diploid/long_read_aligner_scattered_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.R941_Guppy5.winnowmap.bam \
--f /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
--o /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/ \
--p HG005_y2_pmdv \
--t 32 \
---ont_r9_guppy5_sup
+-v /private/groups/patenlab:/private/groups/patenlab \
+jmcdani20/hap.py:v0.3.12 /opt/hap.py/bin/hap.py \
+/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_y2_hybrid.variants.filtered.vcf.gz \
+/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_PEPPER_DeepVariant.filtered.vcf.gz \
+-r /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+-o /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/hybrid_ont_happy \
+--pass-only \
+--engine=vcfeval \
+--threads=16
+
+docker run --rm -u `id -u`:`id -g` \
+-v /private/groups/patenlab:/private/groups/patenlab \
+kishwars/t2t_polishing:0.1 \
+python3 vcf_merge_t2t.py \
+-v1 /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_y2_hybrid.variants.filtered.vcf.gz \
+-v2 /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/snv_indel_assembly.outfiles/HG005_PEPPER_DeepVariant.filtered.vcf.gz \
+-hv /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/hybrid_ont_happy.vcf.gz \
+-o /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_MERGED_SMALL_VARIANTS.vcf.gz
+```
+
+Run Merfin
+```
+docker run -it --rm -v /private/groups:/private/groups \
+    miramastoras/merfin:latest \
+    merfin -polish  \
+    -vcf /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_MERGED_SMALL_VARIANTS.vcf.gz \
+    -threads 32 \
+    -sequence /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    -readmers /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.30x.meryl \
+    -prob /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/merfin_manual/genomescope_outfiles/lookup_table.txt \
+    -peak 44.9 \
+    -output /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_MERGED_SMALL_VARIANTS.filtered.k21.merfin
 ```
 
 Run merfin
