@@ -195,10 +195,11 @@ ASM=/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_a
 # align element to polished assembly
 docker run -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira mobinasri/long_read_aligner:v0.3.3 minimap2 --cs --eqx -t 32 -ax sr ${ASM} /private/groups/patenlab/mira/hprc_polishing/data/element_HG002/HG002-20220606.grch38.bam.element.fq.gz | samtools view -b -h > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.bam
 
-samtools index /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.bam
+ulimit -Sn 5000
+mkdir -p /data/tmp/mira/
 
 # sort files and index
-samtools sort -@32 /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.bam > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.srt.bam
+samtools sort -T /data/tmp/mira/ -@32 /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.bam > /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.srt.bam
 
 samtools index /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.srt.bam
 ```
@@ -283,29 +284,71 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/groups/hpr
 
 ```
 {
-  "PHARAOH.allHifiToDiploidBai": "File",
+  "PHARAOH.allHifiToDiploidBai": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.srt.bam.bai",
   "PHARAOH.minWindowSizeBp": "1000",
   "PHARAOH.extendBp": "50000",
-  "PHARAOH.allONTToHap2Bam": "File",
-  "PHARAOH.allONTToHap1Bam": "File",
-  "PHARAOH.diploidFaGz": "File",
-  "PHARAOH.Hap1Fasta": "File",
-  "PHARAOH.allONTToHap2Bai": "File",
-  "PHARAOH.Hap2Fasta": "File",
-  "PHARAOH.Hap1FastaIndex": "File",
-  "PHARAOH.allHifiToDiploidBam": "File",
-  "PHARAOH.allONTToHap1Bai": "File",
-  "PHARAOH.Hap2FastaIndex": "File",
-  "PHARAOH.sampleName": "String",
+  "PHARAOH.allONTToHap2Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/HiFi_DCv1.2_all_to_mat/long_read_aligner_scattered_outfiles/HG002.DCv1.2_40x.all_to_mat.minimap2v2.26.bam",
+  "PHARAOH.allONTToHap1Bam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/HiFi_DCv1.2_all_to_pat/long_read_aligner_scattered_outfiles/HG002.DCv1.2_40x.all_to_pat.minimap2v2.26.bam",
+  "PHARAOH.diploidFaGz": "/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_dip.polished.fasta.gz",
+  "PHARAOH.Hap1Fasta": "/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.fasta",
+  "PHARAOH.allONTToHap2Bai": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/HiFi_DCv1.2_all_to_mat/long_read_aligner_scattered_outfiles/HG002.DCv1.2_40x.all_to_mat.minimap2v2.26.bam.bai",
+  "PHARAOH.Hap2Fasta": "/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.polished.fasta",
+  "PHARAOH.Hap1FastaIndex": "/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.fasta.fai",
+  "PHARAOH.allHifiToDiploidBam": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.srt.bam",
+  "PHARAOH.allONTToHap1Bai": "/private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/HiFi_DCv1.2_all_to_pat/long_read_aligner_scattered_outfiles/HG002.DCv1.2_40x.all_to_pat.minimap2v2.26.bam.bai",
+  "PHARAOH.Hap2FastaIndex": "/private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.polished.fasta.fai",
+  "PHARAOH.sampleName": "HG002",
   "PHARAOH.PharaohHiFiPreset": "sr",
-  "PHARAOH.alignAllToHap2Scattered.options": "--cs --eqx",
-  "PHARAOH.alignAllToHap1Scattered.options": "--cs --eqx",
-  "PHARAOH.subDipBamByHomozygous.threadCount": "Int (optional, default = 32)",
-  "PHARAOH.WhatsHapPhaseHap1.dockerImage": "String (optional, default = \"tpesout/whatshap:latest\")",
-  "PHARAOH.runSecPhase.secphaseOptions": "String (optional, default = \"--hifi\")",
-  "PHARAOH.correctBamMaxDivergenceHap2.mapqTableText": "File? (optional)",
-  "PHARAOH.correctBamMaxDivergenceHap1.preemptible": "Int (optional, default = 2)",
-  "PHARAOH.correctBamMaxDivergenceHap2.memSize": "Int (optional, default = 8)",
-  "PHARAOH.DeepVariantHap1.threadCount": "Int (optional, default = 32)"
+  "PHARAOH.hifiAlignmentOptions": "--cs --eqx",
+  "PHARAOH.hifiAlignmentOptions": "--cs --eqx"
 }
+```
+
+```
+#!/bin/bash
+#SBATCH --job-name=PHARAOH_element_test1
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=long
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --exclude=phoenix-[09,10,22,23,24]
+#SBATCH --output=%x.%j.log
+#SBATCH --time=7-00:00
+
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=7-00:00 --partition=long"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+
+LOCAL_FOLDER=/data/tmp/$(whoami)/PHARAOH_element
+mkdir -p ${LOCAL_FOLDER}
+
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/element_polishing/PHARAOH/default_1kb_extend_20kb/toil_logs
+
+toil-wdl-runner \
+    --jobStore ${LOCAL_FOLDER}/jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem single_machine \
+    --maxCores 32 \
+    --batchLogsDir /private/groups/patenlab/mira/hprc_polishing/element_polishing/PHARAOH/default_1kb_extend_20kb/toil_logs \
+    /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/workflows/PHARAOH.wdl \
+    /private/groups/patenlab/mira/hprc_polishing/element_polishing/PHARAOH/default_1kb_extend_20kb/PHARAOH.inputs.json  \
+    --outputDirectory /private/groups/patenlab/mira/hprc_polishing/element_polishing/PHARAOH/default_1kb_extend_20kb/PHARAOH_outputs \
+    --outputFile /private/groups/patenlab/mira/hprc_polishing/element_polishing/PHARAOH/default_1kb_extend_20kb/PHARAOH_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    2>&1 | tee log.txt
+
+toil clean ${LOCAL_FOLDER}/jobstore
+```
+
+Run deepvariant
+```
+
 ```

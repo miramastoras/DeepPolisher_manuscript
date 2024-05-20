@@ -201,7 +201,7 @@ grep NO_COVERAGE /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_
 ```
 bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/add_PL_tag/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam -b /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.bed > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.bam
 
-bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/add_PL_tag/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam -b /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.bed > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.20kb.bam
+bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/alignments/add_PL_tag/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.bam -b /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/mosdepth/HG002_y2_DCv1.2_40x.PHARAOHv6.quant.NO_COVERAGE.mrg.20kb.bed > /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/polishing_dropouts/alignments/HG002.trio_hifiasm_0.19.5.DCv1.2.PHARAOH.Dorado.R10.secphase.mm2v2.26.merged.PL_tag.NO_HiFI_COV.20kb.bam
 
 ```
 4. run hybrid polisher model
@@ -214,7 +214,7 @@ bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/hifi_
 #SBATCH --mail-user=mmastora@ucsc.edu
 #SBATCH --nodes=1
 #SBATCH --mem=256gb
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=64
 #SBATCH --output=%x.%j.log
 #SBATCH --exclude=phoenix-[09,10,22,23,24]
 #SBATCH --time=7-00:00

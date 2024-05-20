@@ -1,3 +1,5 @@
+# Parsing DeepPolisher results to get data in the right format for manuscript figures
+
 ## Annotating FP kmers, fig2
 
 Combine HG002 and HG005 hap FP kmer bedfiles from merqury to use
@@ -201,9 +203,26 @@ for sample in HG005_nextPolish2 HG005_deepvariant HG005_y2_DCv1.2_PHv6_mm2_model
     done
 ```
 
-https://genomeark.s3.amazonaws.com/index.html?prefix=species/Gorilla_gorilla/mGorGor1/genomic_data/pacbio_hifi/previous-versions/
-https://genomeark.s3.amazonaws.com/species/Pan_paniscus/mPanPan1/assembly_curated/mPanPan1.MT.cur.20231122.fasta.gz
+### Collecting # FP kmers for all coverage titrations (fig 2 and supplement)
 
-s3://genomeark/species/Gorilla_gorilla/mGorGor1/genomic_data/pacbio_hifi/m64076_210215_140546.hifi_reads.bam
-https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissions/
-https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissions/
+```sh
+cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_coverage_titrations/hprc_polishing_QC_no_meryl
+cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl
+
+mkdir -p count_fp_kmers
+echo "sample_id,fp_kmers_wg,fp_kmers_conf" > all_samples_fp_kmer_counts.csv
+
+cut -f 1 -d "," GIAB_samples_polisher_evaluation_manuscript.csv | grep -v "sample_id" | while read line
+    do mkdir -p count_fp_kmers/${line}/wg/
+    tar -zxvf ${line}/analysis/hprc_polishing_QC_no_meryl_outputs/*polished.merqury.tar.gz -C count_fp_kmers/${line}/wg/
+    fp_kmers_wg=`cat count_fp_kmers/${line}/wg/*.polished.merqury.qv | cut -f2 | tail -n 1`
+
+    mkdir -p count_fp_kmers/${line}/conf/
+    tar -zxvf ${line}/analysis/hprc_polishing_QC_no_meryl_outputs/Polished.insideConf.subBed.merqury.tar.gz -C count_fp_kmers/${line}/conf/
+    fp_kmers_conf=`cat count_fp_kmers/${line}/conf/Polished.insideConf.subBed.merqury.qv | cut -f2 | tail -n 1`
+
+    echo ${line},${fp_kmers_wg},${fp_kmers_conf} >> all_samples_fp_kmer_counts.csv
+  done
+
+rm -rf count_fp_kmers
+```

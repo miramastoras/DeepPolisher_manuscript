@@ -84,3 +84,13 @@ cd /private/groups/patenlab/mira/t2t_primates_polishing/reads
 mkdir -p slurm_logs/
 sbatch downsample_hifi.sh T2T_primates_all_manuscript.csv
 ```
+
+List files for spreasheet:
+```
+cd /private/groups/patenlab/mira/t2t_primates_polishing/reads/hifi
+
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1 ; do realpath ${sample}/*.bam ; done
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1 ; do realpath ${sample}/*.bai ; done
+```
+
+Submitted to deeppolisher https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/hprc_DeepPolisher/T2T_primates 
