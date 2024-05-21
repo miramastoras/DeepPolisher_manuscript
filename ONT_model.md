@@ -83,3 +83,20 @@ time toil-wdl-runner \
     --logDebug \
     2>&1 | tee log.txt
 ```
+
+Run manually due to samtools error
+```
+#!/bin/bash
+#SBATCH --job-name=Q25_shasta_alignment_ONT_model
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --exclude=phoenix-[09,10,22,23,24]
+#SBATCH --output=%x.%j.log
+#SBATCH --time=7-0:00
+
+docker run -u `id -u`:`id -g` -v /private:/private mobinasri/long_read_aligner:v0.4.0 minimap2 -k 15 --cs --eqx -L -Y -ax map-ont -t32 /private/groups/patenlab/mira/ONT_DeepPolisher/assemblies/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.dip.fasta /private/nanopore/basecalled/q27/q25_400speed/PAW42666andPAW42495_gt10q10k_doradoTrimmed.fastq.gz  > /private/groups/patenlab/mira/ONT_DeepPolisher/alignments/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.minimap2/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.dip.mm2.sam
+```

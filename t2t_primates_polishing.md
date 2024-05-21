@@ -93,4 +93,25 @@ for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1 ; do realpat
 for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1 ; do realpath ${sample}/*.bai ; done
 ```
 
-Submitted to deeppolisher https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/hprc_DeepPolisher/T2T_primates 
+Download hap1 and hap2 raw fasta files
+```
+cd /private/groups/patenlab/mira/t2t_primates_polishing/assemblies
+
+conda activate awscli
+
+cut -f 1 -d"," /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/hprc_DeepPolisher/T2T_primates/T2T_primates_all_manuscript.csv | grep -v "sample_id" | while read line ; do
+    mkdir -p ${line}
+    hap1_fa=`grep ${line} /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/hprc_DeepPolisher/T2T_primates/T2T_primates_all_manuscript.csv | cut -f2 -d"," | sed 's/.fasta.gz/.fasta/g'`
+    hap2_fa=`grep ${line} /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/hprc_DeepPolisher/T2T_primates/T2T_primates_all_manuscript.csv | cut -f3 -d"," | sed 's/.fasta.gz/.fasta/g'`
+    hap1_fai=`grep ${line} /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/hprc_DeepPolisher/T2T_primates/T2T_primates_all_manuscript.csv | cut -f2 -d"," | sed 's/.fasta.gz/.fasta.fai/g'`
+    hap2_fai=`grep ${line} /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/hprc_DeepPolisher/T2T_primates/T2T_primates_all_manuscript.csv | cut -f3 -d"," | sed 's/.fasta.gz/.fasta.fai/g'`
+
+    aws s3 cp ${hap1_fa} ${line}/
+    aws s3 cp ${hap2_fa} ${line}/
+    aws s3 cp ${hap1_fai} ${line}/
+    aws s3 cp ${hap2_fai} ${line}/
+  done
+```
+
+
+Submitted to deeppolisher https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/hprc_DeepPolisher/T2T_primates

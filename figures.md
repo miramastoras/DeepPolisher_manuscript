@@ -226,3 +226,23 @@ cut -f 1 -d "," GIAB_samples_polisher_evaluation_manuscript.csv | grep -v "sampl
 
 rm -rf count_fp_kmers
 ```
+
+#### Collecting number of polishing edits on chr20 for all HG002 experiments
+
+```
+bed=/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.grch38.chr20.bed
+conda activate analysis
+
+cut -f1 -d"," /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/applyPolish_dipcall_happy/GIAB_samples_manuscript/GIAB_samples_polisher_evaluation_manuscript.csv | grep -v "sample_id" | grep "HG002" | while read line ; do
+  vcf=`grep ${line} /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/applyPolish_dipcall_happy/GIAB_samples_manuscript/GIAB_samples_polisher_evaluation_manuscript.csv | cut -f 5 -d","`
+  count=`bedtools intersect -a ${vcf} -b ${bed} | sort | uniq | wc -l`
+  echo ${line},${count}
+  done
+
+#
+cut -f1 -d"," /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/applyPolish_dipcall_happy/GIAB_coverage_titrations/GIAB_samples_hprc_deepPolisher_manuscript.csv | grep -v "sample_id" | grep "HG002" | while read line ; do
+  vcf=`grep ${line} /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/applyPolish_dipcall_happy/GIAB_coverage_titrations/GIAB_samples_hprc_deepPolisher_manuscript.csv | cut -f 10 -d","`
+  count=`bedtools intersect -a ${vcf} -b ${bed} | sort | uniq | wc -l`
+  echo ${line},${count}
+  done
+```
