@@ -245,4 +245,11 @@ cut -f1 -d"," /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/
   count=`bedtools intersect -a ${vcf} -b ${bed} | sort | uniq | wc -l`
   echo ${line},${count}
   done
+
+#
+for cov in 60x 50x 30x 20x 10x ; do
+    echo $cov
+    bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG002_${cov}_dp_no_phasing/analysis/DeepPolisher_outputs/polisher_output.vcf.gz -b $bed | sort | uniq | wc -l
+    done
+
 ```

@@ -17,6 +17,99 @@ for data in hifi ont ilm ; do
 
 Added coverages to column in spreadsheet.
 
+Download illumina files and check coverage with mosdepth
+```sh
+#!/bin/bash
+
+#SBATCH --job-name=t2t_primates_ilm_mosdepth
+#SBATCH --cpus-per-task=4
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mem=200gb
+#SBATCH --threads-per-core=1
+#SBATCH --output=slurm_logs/downsample_%x_%j_%A_%a.log
+#SBATCH --time=12:00:00
+#SBATCH --array=[1-6]%6
+
+set -ex
+
+## Pull samples names from CSV passed to script
+sample_file=$1
+
+# Read the CSV file and extract the sample ID for the current job array task
+# Skip first row to avoid the header
+sample_id=$(awk -F ',' -v task_id=${SLURM_ARRAY_TASK_ID} 'NR>1 && NR==task_id+1 {print $1}' "${sample_file}")
+ilm_reads=$(awk -F ',' -v task_id=${SLURM_ARRAY_TASK_ID} 'NR>1 && NR==task_id+1 {print $6}' "${sample_file}" | sed 's/\"//g' | sed 's/[][]//g')
+
+# Ensure a sample ID is obtained
+if [ -z "${sample_id}" ]; then
+    echo "Error: Failed to retrieve a valid sample ID. Exiting."
+    exit 1
+fi
+
+echo "${sample_id}"
+
+OUTDIR=/private/groups/patenlab/mira/t2t_primates_polishing/reads/ilm/${sample_id}
+mkdir -p ${OUTDIR}
+cd ${OUTDIR}
+
+source /private/home/mmastora/progs/miniconda3/etc/profile.d/conda.sh
+conda activate awscli
+
+## make folder on local node for data
+aws s3 cp ${ilm_reads} ${OUTDIR}
+aws s3 cp ${ilm_reads}.bai ${OUTDIR}
+
+ILM_NAME=`basename ${ilm_reads}`
+
+mkdir -p ${OUTDIR}/mosdepth/
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v ${OUTDIR}/mosdepth/:/opt/mount \
+    quay.io/biocontainers/mosdepth:0.2.4--he527e40_0 \
+    mosdepth -n --fast-mode -t 4 ${OUTDIR}/mosdepth/${sample_id} \
+    ${OUTDIR}/${ILM_NAME}
+
+source /private/home/mmastora/progs/miniconda3/etc/profile.d/conda.sh
+conda activate analysis
+
+python3 ~/progs/mosdepth/scripts/plot-dist.py ${OUTDIR}/mosdepth/${sample_id}.mosdepth.global.dist.txt &> ${OUTDIR}/mosdepth/coverages.txt
+```
+
+```
+  cd /private/groups/patenlab/mira/t2t_primates_polishing/reads/ilm/
+
+mkdir -p slurm_logs/
+
+sbatch ilm_coverage.slurm.sh /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/hprc_DeepPolisher/T2T_primates/T2T_primates_all_manuscript.csv
+
+ls | grep "m*" | while read line ; do tail -n1 ${line}/mosdepth/coverages.txt; done
+```
+
+Only need to downsample mSymSyn1
+```sh
+#!/bin/bash
+
+#SBATCH --job-name=mSymSyn1_downsample_ilm
+#SBATCH --cpus-per-task=32
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mem=200gb
+#SBATCH --threads-per-core=1
+#SBATCH --time=12:00:00
+
+samtools view -s .6 -b -h -@ 32 /private/groups/patenlab/mira/t2t_primates_polishing/reads/ilm/mSymSyn1/bwa.analysis-dip.illumina.dedup.bam > /private/groups/patenlab/mira/t2t_primates_polishing/reads/ilm/mSymSyn1/bwa.analysis-dip.illumina.dedup.30x.bam
+
+samtools index /private/groups/patenlab/mira/t2t_primates_polishing/reads/ilm/mSymSyn1/bwa.analysis-dip.illumina.dedup.30x.bam
+```
+
 ### Downsampling and downloading hifi data
 
 ```sh

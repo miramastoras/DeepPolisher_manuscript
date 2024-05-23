@@ -172,7 +172,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
   "longReadAlignmentScattered.alignerOptions": "--cs --eqx -L -Y -I8g",
   "longReadAlignmentScattered.kmerSize": 19,
   "longReadAlignmentScattered.sampleName": "HG005",
-  "longReadAlignmentScattered.suffix": "DCv1.2_60x.minimap2v2.26",
+  "longReadAlignmentScattered.suffix": "DCv1.2_50x.minimap2v2.26",
   "longReadAlignmentScattered.readFiles": ["/private/groups/patenlab/masri/hprc/polishing/HG005/reads/HiFi_DC_v1.2/downsampled_40x/m64017_200723_190224.dc.q20.fastq.gz","/private/groups/patenlab/masri/hprc/polishing/HG005/reads/HiFi_DC_v1.2/downsampled_40x/m64017_200801_011415.dc.q20.fastq.gz","/private/groups/patenlab/masri/hprc/polishing/HG005/reads/HiFi_DC_v1.2/downsampled_40x/m64017_200802_073944.dc.q20.fastq.gz","/private/groups/patenlab/masri/hprc/polishing/HG005/reads/HiFi_DC_v1.2/downsampled_40x/m64109_200304_195708.dc.q20.fastq.gz","/private/groups/patenlab/masri/hprc/polishing/HG005/reads/HiFi_DC_v1.2/downsampled_40x/m64109_200309_192110.dc.q20.fastq.gz","https://storage.googleapis.com/brain-genomics/kishwar/share/deepconsensus/v1.2/m64017_200730_190124.dc.q20.fastq.gz"],
   "longReadAlignmentScattered.enableAddingMDTag": false
 }

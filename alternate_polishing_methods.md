@@ -1041,3 +1041,158 @@ bash /private/home/mmastora/progs/scripts/GIAB_happy.sh /private/groups/patenlab
 bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIAB_T2T_Q100_conf_beds_concordant_50bp.dipcall_z2k.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_y2_unpolished/happy_chr20_out/happy HG002
 
 bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_y2_unpolished/happy_chr20_out/happy HG005
+
+
+### Running deepvariant on pharaoh alignments
+
+```
+#!/bin/bash
+#SBATCH --job-name=dv-hifi_HG002_PH
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+cd /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_PHARAOH_DV
+
+BIN_VERSION="1.6.1"
+docker run -u `id -u`:`id -g` \
+  -v "/private/groups/patenlab/mira":"/private/groups/patenlab/mira" \
+  google/deepvariant:"${BIN_VERSION}" \
+  /opt/deepvariant/bin/run_deepvariant \
+  --model_type=PACBIO \
+  --ref=/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+  --reads=/private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/HG002_y2_DCv1.2_mm2_PHARAOH_whatshap/toil_hprc_pipeline_out/HG002_y2_DCv1.2_PHARAOH_minimap_alignments/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.minimap2v2.26.PHARAOH.bam \
+  --output_vcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_PHARAOH_DV/HG002_y2_DCv1.2_PHARAOHv6.deepvariant.vcf.gz \
+  --output_gvcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_PHARAOH_DV/HG002_y2_DCv1.2_PHARAOHv6.deepvariant.gvcf.gz \
+  --num_shards=32
+```
+
+HG005
+
+```
+#!/bin/bash
+#SBATCH --job-name=dv-hifi_HG005_PH
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+cd /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV
+BIN_VERSION="1.6.1"
+
+docker run -u `id -u`:`id -g` \
+  -v "/private/groups/":"/private/groups/" \
+  google/deepvariant:"${BIN_VERSION}" \
+  /opt/deepvariant/bin/run_deepvariant \
+  --model_type=PACBIO \
+  --ref=/private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+  --reads=/private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/HG005_y2_DCv1.2_PHv6_DPmm2model1/toil_hprc_deepPolisher_out/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.PHARAOHv6.bam \
+  --output_vcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV/HG005_y2_DCv1.2_PHv6.deepvariant.vcf.gz \
+  --output_gvcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV/HG005_y2_DCv1.2_PHv6.deepvariant.gvcf.gz \
+  --num_shards=32
+```
+HG02258
+
+```
+#!/bin/bash
+#SBATCH --job-name=dv-hifi_HG02258_PH
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+cat /private/groups/hprc/assembly/batch1/HG02258/analysis/assembly/HG02258.pat.fa.gz /private/groups/hprc/assembly/batch1/HG02258/analysis/assembly/HG02258.mat.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.dip.fa.gz
+
+cd /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV
+BIN_VERSION="1.6.1"
+
+docker run -u `id -u`:`id -g` \
+  -v "/private/groups/":"/private/groups/" \
+  google/deepvariant:"${BIN_VERSION}" \
+  /opt/deepvariant/bin/run_deepvariant \
+  --model_type=PACBIO \
+  --ref=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.dip.fa.gz \
+  --reads=/private/groups/hprc/polishing/batch2/HG02258/hprc_DeepPolisher_outputs/HG02258.hifi.to.diploid.asm.PHARAOH.bam \
+  --output_vcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258_y2_DCv1.2_PHv6.deepvariant.vcf.gz \
+  --output_gvcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258_y2_DCv1.2_PHv6.deepvariant.gvcf.gz \
+  --num_shards=32
+```
+
+HG04115
+```
+#!/bin/bash
+#SBATCH --job-name=dv-hifi_HG04115_PH
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+cat /private/groups/hprc/assembly/batch2/HG04115/analysis/assembly/HG04115.pat.fa.gz /private/groups/hprc/assembly/batch2/HG04115/analysis/assembly/HG04115.mat.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.dip.fa.gz
+
+cd /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV
+BIN_VERSION="1.6.1"
+
+docker run -u `id -u`:`id -g` \
+  -v "/private/groups/":"/private/groups/" \
+  google/deepvariant:"${BIN_VERSION}" \
+  /opt/deepvariant/bin/run_deepvariant \
+  --model_type=PACBIO \
+  --ref=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.dip.fa.gz \
+  --reads=/private/groups/hprc/polishing/batch3/HG04115/hprc_DeepPolisher_outputs/HG04115.hifi.to.diploid.asm.PHARAOH.bam \
+  --output_vcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115_y2_DCv1.2_PHv6.deepvariant.vcf.gz \
+  --output_gvcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115_y2_DCv1.2_PHv6.deepvariant.gvcf.gz \
+  --num_shards=32
+```
+
+NA20905
+```
+#!/bin/bash
+#SBATCH --job-name=dv-hifi_NA20905_PH
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+cat /private/groups/hprc/assembly/batch4/NA20905/analysis/hic_hifiasm_assembly_cutadapt_multistep_outputs/NA20905.hap1.xygrouped.fa.gz /private/groups/hprc/assembly/batch4/NA20905/analysis/hic_hifiasm_assembly_cutadapt_multistep_outputs/NA20905.hap2.xygrouped.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.dip.fa.gz
+
+cd /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/
+BIN_VERSION="1.6.1"
+
+docker run -u `id -u`:`id -g` \
+  -v "/private/groups/":"/private/groups/" \
+  google/deepvariant:"${BIN_VERSION}" \
+  /opt/deepvariant/bin/run_deepvariant \
+  --model_type=PACBIO \
+  --ref=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.dip.fa.gz \
+  --reads=/private/groups/hprc/polishing/batch5/NA20905/analysis/hprc_DeepPolisher_outputs/NA20905.hifi.to.diploid.asm.PHARAOH.bam \
+  --output_vcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905_y2_DCv1.2_PHv6.deepvariant.vcf.gz \
+  --output_gvcf=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905_y2_DCv1.2_PHv6.deepvariant.gvcf.gz \
+  --num_shards=32
+```
+
+```
+bcftools view -f "PASS" /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV/HG005_y2_DCv1.2_PHv6.deepvariant.vcf.gz -Oz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV/HG005_y2_DCv1.2_PHv6.deepvariant.PASS.vcf.gz
+
+bcftools view -f "PASS" /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_PHARAOH_DV/HG002_y2_DCv1.2_PHARAOHv6.deepvariant.vcf.gz -Oz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_PHARAOH_DV/HG002_y2_DCv1.2_PHARAOHv6.deepvariant.PASS.vcf.gz
+
+```
+
+```
+/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV/
+```
