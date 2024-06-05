@@ -233,3 +233,102 @@ time toil-wdl-runner \
 ```
 
 clush -w phoenix-[00-09,11-20] "rm -rvf /data/tmp/mmastora/"
+
+debug 20x HG005
+```
+#!/bin/bash
+#SBATCH --job-name=HG005_DP_20x
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=64
+#SBATCH --output=%x.%j.log
+#SBATCH --exclude=phoenix-[09,10,22,23,24]
+#SBATCH --time=7-00:00
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    google/deepconsensus:polisher_v0.0.8_12122023 \
+    polisher make_images \
+    --bam /private/groups/patenlab/mira/hprc_polishing/data/phoenix_batch_submissions/correct_bam/HG005_20x_dp_no_phasing/analysis/correct_bam_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.20x.maxDiv.02.bam \
+    --fasta /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    --output /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG005_20x_dp_no_phasing/manual/images/images \
+    --cpus 64
+
+# Inference on images to generate VCFs
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    google/deepconsensus:polisher_v0.0.8_12122023 \
+    polisher inference \
+    --input_dir /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG005_20x_dp_no_phasing/manual/images/images \
+    --out_dir /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG005_20x_dp_no_phasing/manual/vcf/ \
+    --checkpoint /private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-665/checkpoint-665 \
+    --reference_file /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    --sample_name HG005 \
+    --cpus 64
+```
+
+Running the rest through this script and not in toil because I can't figure out the bug
+
+```
+#!/bin/bash
+#SBATCH --job-name=HG005_DP
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=long
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=64
+#SBATCH --output=%x.%j.log
+#SBATCH --exclude=phoenix-[09,10,22,23,24]
+#SBATCH --time=7-00:00
+
+BAM=$1
+OUTDIR=$2
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    google/deepconsensus:polisher_v0.0.8_12122023 \
+    polisher make_images \
+    --bam ${BAM} \
+    --fasta /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    --output ${OUTDIR}/images/images \
+    --cpus 64
+
+# Inference on images to generate VCFs
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    google/deepconsensus:polisher_v0.0.8_12122023 \
+    polisher inference \
+    --input_dir ${OUTDIR}/images/images \
+    --out_dir ${OUTDIR}/vcf/ \
+    --checkpoint /private/groups/patenlab/mira/hprc_polishing/data/DeepPolisher_models/checkpoint-665/checkpoint-665 \
+    --reference_file /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa \
+    --sample_name HG005 \
+    --cpus 64
+```
+
+```
+cd /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript
+
+cut -f1 -d"," GIAB_samples_deepPolisher_manuscript.csv \
+    | grep -v "sample_id" | grep "HG005" | while read line ; do \
+    bam=`grep $line GIAB_samples_deepPolisher_manuscript.csv | cut -f 8 -d","`
+    mkdir -p /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/${line}/manual/
+    echo "sbatch launch_HG005_manually.sh $bam /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/${line}/manual/"
+    done
+```
+
+```
+sbatch launch_HG005_manually.sh /private/groups/patenlab/mira/hprc_polishing/data/phoenix_batch_submissions/correct_bam/HG005_60x_dp_no_phasing/analysis/correct_bam_outputs/HG005.DCv1.2_60x.minimap2v2.26.maxDiv.02.bam /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG005_60x_dp_no_phasing/manual/
+
+sbatch launch_HG005_manually.sh /private/groups/patenlab/mira/hprc_polishing/data/phoenix_batch_submissions/correct_bam/HG005_50x_dp_no_phasing/analysis/correct_bam_outputs/HG005.DCv1.2_50x.minimap2v2.26.maxDiv.02.bam /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG005_50x_dp_no_phasing/manual/
+
+sbatch launch_HG005_manually.sh /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/HiFi_DCv1.2_minimap2/correct_bam/correct_bam_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.maxDiv.02.bam /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG005_40x_dp_no_phasing/manual/
+
+sbatch launch_HG005_manually.sh /private/groups/patenlab/mira/hprc_polishing/data/phoenix_batch_submissions/correct_bam/HG005_30x_dp_no_phasing/analysis/correct_bam_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.30x.maxDiv.02.bam /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG005_30x_dp_no_phasing/manual/
+
+sbatch launch_HG005_manually.sh /private/groups/patenlab/mira/hprc_polishing/data/phoenix_batch_submissions/correct_bam/HG005_10x_dp_no_phasing/analysis/correct_bam_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.minimap2v2.26.10x.maxDiv.02.bam /private/groups/patenlab/mira/hprc_polishing/deepPolisher_runs/phoenix_batch_submissions_manuscript/HG005_10x_dp_no_phasing/manual/
+```

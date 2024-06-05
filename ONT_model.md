@@ -157,6 +157,27 @@ time toil-wdl-runner \
     2>&1 | tee log.txt
 ```
 
+Sort and index bam
+```
+#!/bin/bash
+#SBATCH --job-name=ONT_model_sort
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+ulimit -Sn 5000
+
+mkdir -p /data/tmp/mira/
+
+samtools sort -@32 -T /data/tmp/mira/ /private/groups/patenlab/mira/ONT_DeepPolisher/alignments/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.minimap2/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.dip.mm2.bam > /private/groups/patenlab/mira/ONT_DeepPolisher/alignments/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.minimap2/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.dip.mm2.srt.bam
+
+samtools index /private/groups/patenlab/mira/ONT_DeepPolisher/alignments/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.minimap2/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.dip.mm2.srt.bam
+```
 Run correct bam
 ```
 java -jar /private/home/mmastora/progs/womtool-85.jar inputs ~/progs/hpp_production_workflows/QC/wdl/tasks/correct_bam.wdl
@@ -165,7 +186,7 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs ~/progs/hpp_product
 ```
 {
   "runCorrectBam.correctBam.options": "--primaryOnly -m0 -a0 --maxDiv 0.09",
-  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/ONT_DeepPolisher/alignments/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.minimap2/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.dip.mm2.bam",
+  "runCorrectBam.correctBam.Bam": "/private/groups/patenlab/mira/ONT_DeepPolisher/alignments/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.minimap2/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.dip.mm2.srt.bam",
   "runCorrectBam.correctBam.phasingLogText": "/private/groups/patenlab/mira/ONT_DeepPolisher/alignments/HG002_R10_45x_Q25.shasta_v0.12.1.gfase.minimap2/secphase/secphase_outfiles/secphase_v0.4.3.out.log",
   "runCorrectBam.correctBam.suffix": "secphase.maxDiv.09"
 }
@@ -203,6 +224,48 @@ time toil-wdl-runner \
     correct_bam_inputs.json \
     --outputDirectory ./correct_bam_outfiles \
     --outputFile correct_bam_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
+### Spot check alignments for training model
+
+Dipcall against grch38
+
+```json
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/ONT_DeepPolisher/assemblies/phase_1.fasta",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/ONT_DeepPolisher/assemblies/phase_0.fasta",
+  "runDipcall.dipcall.referenceIsHS38": true,
+  "dipcall.isMaleSample":true
+}
+```
+Run dipcall
+
+```sh
+cd /private/groups/patenlab/mira/ONT_DeepPolisher/dipcall/unpolished_HG002_R10_45x_Q25.shasta_v0.12.1.gfase
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=7-0:00 --partition=high_priority --exclude=phoenix-[09,10,22,23,24]"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem single_machine \
+    --maxCores 32 \
+    --batchLogsDir ./toil_logs \
+    /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/dipcall.wdl \
+    dipcall_inputs.json \
+    --outputDirectory ./dipcall_outfiles \
+    --outputFile dipcall_outputs.json \
     --runLocalJobsOnWorkers \
     --retryCount 1 \
     --disableProgress \

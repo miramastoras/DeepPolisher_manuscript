@@ -1194,5 +1194,282 @@ bcftools view -f "PASS" /private/groups/patenlab/mira/hprc_polishing/y2_alt_poli
 ```
 
 ```
+bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_PHv6_deepvariant/applyPolish_dipcall_outputs/HG002_PHv6_deepvariant_hap1.polished.dipcall.vcf.gz \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIAB_T2T_Q100_conf_beds_concordant_50bp.dipcall_z2k.bed \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_PHv6_deepvariant/happy_chr20_out/HG002_happy_out \
+    HG002
+```
+
+```
 /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV/
+```
+
+```
+for sample in HG02258 HG04115 NA20905; do
+    echo $sample
+    bcftools view -f "PASS" ${sample}_PHARAOH_DV/${sample}_y2_DCv1.2_PHv6.deepvariant.vcf.gz -Oz > ${sample}_PHARAOH_DV/${sample}_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz
+    zcat ${sample}_PHARAOH_DV/${sample}_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz | grep -v "^#" | grep -v "1/1" | wc -l
+    done
+
+#
+for sample in HG02258 HG04115 NA20905; do
+    realpath ${sample}_PHARAOH_DV/${sample}_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz
+    done
+```
+
+```
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.dip.fa.gz -H1 NA20905_PHARAOH_DV/NA20905_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.dip.DV_polished.fa.gz
+gunzip /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.dip.DV_polished.fa
+# 14406
+
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.dip.fa.gz -H1 HG02258_PHARAOH_DV/HG02258_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.dip.DV_polished.fa.gz
+gunzip /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.dip.DV_polished.fa
+
+# 8707
+
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.dip.fa.gz -H1 HG04115_PHARAOH_DV/HG04115_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.dip.DV_polished.fa
+# 59554
+```
+
+```
+#!/bin/bash
+#SBATCH --job-name=merqury
+#SBATCH --partition=high_priority
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=8
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+# HG02258
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/merqury_k21
+
+docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/merqury_k21:/data \
+    juklucas/hpp_merqury:latest merqury.sh \
+    /private/groups/hprc/polishing/batch2/apply_GQ_filter/hprc_polishing_QC/HG02258/analysis/hprc_polishing_QC_outputs/HG02258.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.dip.DV_polished.fa \
+    HG02258.merqury
+
+# HG04115
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/merqury_k21
+
+docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/merqury_k21:/data \
+    juklucas/hpp_merqury:latest merqury.sh \
+    /private/groups/hprc/polishing/batch3/apply_GQ_filter/hprc_polishing_QC/HG04115/hprc_polishing_QC_outputs/HG04115.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.dip.DV_polished.fa \
+    HG04115.merqury
+
+#
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/merqury_k21
+
+docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/merqury_k21:/data \
+    juklucas/hpp_merqury:latest merqury.sh \
+    /private/groups/hprc/polishing/batch5/hprc_polishing_QC_k21/NA20905/analysis/hprc_polishing_QC_outputs/NA20905.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.dip.DV_polished.fa \
+    NA20905.merqury
+
+# HG002
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_PHARAOH_DV/merqury_k21
+docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG002_PHARAOH_DV/merqury_k21:/data \
+    juklucas/hpp_merqury:latest merqury.sh \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y1_terra_tables/meryl_dbs/ilm.k21.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_PHv6_deepvariant/applyPolish_dipcall_outputs/HG002_PHv6_deepvariant_hap1.polished.fasta \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_PHv6_deepvariant/applyPolish_dipcall_outputs/HG002_PHv6_deepvariant_hap2.polished.fasta \
+    HG002.merqury
+
+# HG005
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV/merqury_k21
+
+docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG005_PHARAOH_DV/merqury_k21:/data \
+    juklucas/hpp_merqury:latest merqury.sh \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.30x.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_PHv6_deepvariant/applyPolish_dipcall_outputs/HG005_PHv6_deepvariant_hap1.polished.fasta \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_PHv6_deepvariant/applyPolish_dipcall_outputs/HG005_PHv6_deepvariant_hap2.polished.fasta \
+    HG005.merqury
+
+```
+
+```
+gunzip -c /private/groups/hprc/assembly/batch2/HG04115/analysis/assembly/HG04115.pat.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.pat.fa
+
+gunzip -c  /private/groups/hprc/assembly/batch2/HG04115/analysis/assembly/HG04115.mat.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.mat.fa
+
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.mat.fa -H1 HG04115_PHARAOH_DV/HG04115_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.mat.DV_polished.fa
+
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.pat.fa -H1 HG04115_PHARAOH_DV/HG04115_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.pat.DV_polished.fa
+
+gunzip -c /private/groups/hprc/assembly/batch4/NA20905/analysis/hic_hifiasm_assembly_cutadapt_multistep_outputs/NA20905.hap1.xygrouped.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.hap1.xygrouped.fa
+
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.hap1.xygrouped.fa -H1 NA20905_PHARAOH_DV/NA20905_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.hap1.DV_polished.fa.gz
+
+gunzip -c /private/groups/hprc/assembly/batch4/NA20905/analysis/hic_hifiasm_assembly_cutadapt_multistep_outputs/NA20905.hap2.xygrouped.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.hap2.xygrouped.fa
+
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.hap2.xygrouped.fa -H1 NA20905_PHARAOH_DV/NA20905_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.hap2.DV_polished.fa
+
+
+gunzip -c /private/groups/hprc/assembly/batch1/HG02258/analysis/assembly/HG02258.pat.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.pat.fa
+
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.pat.fa -H1 HG02258_PHARAOH_DV/HG02258_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.pat.DV_polished.fa
+
+
+gunzip -c /private/groups/hprc/assembly/batch1/HG02258/analysis/assembly/HG02258.mat.fa.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.mat.fa
+
+bcftools consensus -f /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.mat.fa -H1 HG02258_PHARAOH_DV/HG02258_y2_DCv1.2_PHv6.deepvariant.vcf.PASS.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.mat.DV_polished.fa
+
+```
+
+```
+#!/bin/bash
+#SBATCH --job-name=merqury_conf
+#SBATCH --partition=high_priority
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=8
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+ASM1=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.pat.DV_polished.fa
+
+ASM2=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG02258_PHARAOH_DV/HG02258.mat.DV_polished.fa
+
+SAMPLE=HG02258
+
+MERYL=/private/groups/hprc/polishing/batch2/apply_GQ_filter/hprc_polishing_QC/HG02258/analysis/hprc_polishing_QC_outputs/HG02258.meryl
+
+# align hap1 to grch38
+docker run --rm -u `id -u`:`id -g` -v /private/groups:/private/groups mobinasri/long_read_aligner:v0.3.3 minimap2 -L --eqx -x asm5 -t32 -c --cs /private/groups/hprc/ref_files/grch38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta ${ASM1} -o /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}_hap1_polished.mm2.grch38.paf
+
+docker run --rm -u `id -u`:`id -g` -v /private/groups:/private/groups mobinasri/long_read_aligner:v0.3.3 minimap2 -L --eqx -x asm5 -t32 -c --cs /private/groups/hprc/ref_files/grch38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta ${ASM2} -o /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}_hap2_polished.mm2.grch38.paf
+
+grep "tp:A:P" /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}_hap2_polished.mm2.grch38.paf > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}_hap2_polished.mm2.grch38.AP.paf
+
+grep "tp:A:P" /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}_hap1_polished.mm2.grch38.paf > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}_hap1_polished.mm2.grch38.AP.paf
+
+# project confidence regions
+docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    mobinasri/flagger:latest python3 /home/programs/src/project_blocks_multi_thread.py \
+    --threads 32 --mode 'ref2asm' \
+    --paf /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}_hap1_polished.mm2.grch38.AP.paf \
+    --blocks /private/groups/hprc/ref_files/giab/HG002_intersect_HG005_GIAB_v4.2.1.bed \
+    --outputProjectable /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/conf.projectable.hap1.bed \
+    --outputProjection /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/conf.projection.hap1.bed
+
+#
+# project confidence regions
+docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    mobinasri/flagger:latest python3 /home/programs/src/project_blocks_multi_thread.py \
+    --threads 32 --mode 'ref2asm' \
+    --paf /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}_hap2_polished.mm2.grch38.AP.paf \
+    --blocks /private/groups/hprc/ref_files/giab/HG002_intersect_HG005_GIAB_v4.2.1.bed \
+    --outputProjectable /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/conf.projectable.hap2.bed \
+    --outputProjection /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/conf.projection.hap2.bed
+
+# subset polished asm to conf regions
+bedtools getfasta -fi ${ASM1} -bed /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/conf.projection.hap1.bed -fo /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}.polished.hap1.conf.fasta
+
+bedtools getfasta -fi ${ASM2} -bed /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/conf.projection.hap2.bed -fo /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}.polished.hap2.conf.fasta
+
+mkdir -p /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/merqury_k21_conf
+
+docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/merqury_k21_conf:/data \
+    juklucas/hpp_merqury:latest merqury.sh \
+    ${MERYL} \
+    /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}.polished.hap1.conf.fasta \
+    /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/${SAMPLE}_PHARAOH_DV/${SAMPLE}.polished.hap2.conf.fasta \
+    ${SAMPLE}.conf.merqury
+```
+
+```
+ASM1=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.pat.DV_polished.fa
+
+ASM2=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/HG04115_PHARAOH_DV/HG04115.mat.DV_polished.fa
+
+SAMPLE=HG04115
+
+MERYL=/private/groups/hprc/polishing/batch3/apply_GQ_filter/hprc_polishing_QC/HG04115/hprc_polishing_QC_outputs/HG04115.meryl
+```
+
+```
+MERYL=/private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k21.30x.meryl
+
+ASM1=/private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_PHv6_deepvariant/applyPolish_dipcall_outputs/HG005_PHv6_deepvariant_hap1.polished.fasta
+
+ASM2=/private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_PHv6_deepvariant/applyPolish_dipcall_outputs/HG005_PHv6_deepvariant_hap2.polished.fasta
+
+SAMPLE=HG005
+```
+```
+MERYL=/private/groups/hprc/polishing/batch5/hprc_polishing_QC_k21/NA20905/analysis/hprc_polishing_QC_outputs/NA20905.meryl
+
+ASM1=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.hap1.DV_polished.fa
+
+ASM2=/private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/NA20905_PHARAOH_DV/NA20905.hap2.DV_polished.fa
+
+SAMPLE=NA20905
+```
+
+
+Rerun happy on chr20,21,22 for HG005 DP, DV and unpolished
+```
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_PHv6_deepvariant/applyPolish_dipcall_outputs/HG005_PHv6_deepvariant_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_PHv6_deepvariant/happy_chr20-22 HG005
+
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/happy_chr20-22 HG005
+
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/happy_chr20-22 HG005
+
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG005_y2_DCv1.2_PHv6_DPmm2_model1_docker_v0.0.8_12122023/applyPolish_dipcall_happy/applyPolish_dipcall_outfiles/HG005_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG005_y2_DCv1.2_PHv6_DPmm2_model1_docker_v0.0.8_12122023/applyPolish_dipcall_happy/applyPolish_dipcall_outfiles/happy_chr20-22 HG005
+
+```
+
+Running with the entire HG005 bed
+```
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_PHv6_deepvariant/applyPolish_dipcall_outputs/HG005_PHv6_deepvariant_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/data/HG005_GRCh38_1_22_v4.2.1_benchmark.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_PHv6_deepvariant/happy_chr20-22_HG005_bed HG005
+
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/data/HG005_GRCh38_1_22_v4.2.1_benchmark.bed /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/happy_chr20-22_HG005_bed HG005
+
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.vcf.gz /private/groups/patenlab/mira/data/HG005_GRCh38_1_22_v4.2.1_benchmark.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/happy_chr20-22_HG005_bed HG005
+
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG005_y2_DCv1.2_PHv6_DPmm2_model1_docker_v0.0.8_12122023/applyPolish_dipcall_happy/applyPolish_dipcall_outfiles/HG005_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/data/HG005_GRCh38_1_22_v4.2.1_benchmark.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG005_y2_DCv1.2_PHv6_DPmm2_model1_docker_v0.0.8_12122023/applyPolish_dipcall_happy/applyPolish_dipcall_outfiles/happy_chr20-22_HG005_bed HG005
+
+```
+
+### Polishing with DV-hybrid model without filters for HG005 and HG002
+
+```
+# HG002
+bcftools consensus -H1 -f /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.pat.fa /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG002_y2_rerun_without_pharaoh_04052024/snv_indel_assembly.outfiles/HG002_deepvariant.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/DV_hybrid_only/HG002/HG002_y2_DV_hybrid_polished.pat.fa
+# 11574
+
+bcftools consensus -H1 -f /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.mat.fa /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG002_y2_rerun_without_pharaoh_04052024/snv_indel_assembly.outfiles/HG002_deepvariant.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/DV_hybrid_only/HG002/HG002_y2_DV_hybrid_polished.mat.fa
+# 12006
+
+# HG005
+bcftools consensus -H1 -f /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.pat.fa /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_y2_hybrid.variants.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/DV_hybrid_only/HG005/HG005_Y2_DV_hybrid_polished.pat.fa
+# 9593
+
+bcftools consensus -H1 -f /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.mat.fa /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/t2t_polish/HG005_y2/variant_calling_manually/HG005_y2_hybrid.variants.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/DV_hybrid_only/HG005/HG005_Y2_DV_hybrid_polished.mat.fa
+# 10288
+```
+
+```
+bash ~/progs/scripts/GIAB_happy_chr20_21_22.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_deepvariant/applyPolish_dipcall_outputs/HG005_deepvariant_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_deepvariant/happy_outputs_chr20_22/happy_outs HG005
 ```
