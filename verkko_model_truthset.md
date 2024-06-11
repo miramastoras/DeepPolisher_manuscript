@@ -1,6 +1,6 @@
 ## Creating a truthset for training a DeepPolisher hifi verkko model
 
-1. Run dipcall
+### 1. Dipcall verkko assembly against truthset (T2T Q100 v0.9)
 
 ```
 #!/bin/bash
@@ -35,7 +35,7 @@ docker run -u `id -u`:`id -g` -v /private/groups:/private/groups \
         humanpangenomics/hpp_dipcall_v0.3:latest make -j2 -f /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/hifi_model/dipcall_verkkov2.0_mat/HG002_t2t_v0.9_2_hprc_mat.mak
 ```
 
-Prepare bed file
+### 2. Project GIAB confidence regions to verkko assembly
 
 Dipcall raw assembly against GRCh38
 ```
@@ -79,7 +79,7 @@ time toil-wdl-runner \
     2>&1 | tee log.txt
 ```
 
-
+Run projection with Mobin's script
 ```
 # 2. removed unmapped records in paf files
 cd /private/groups/patenlab/mira/hprc_polishing/data/HG002_verkko_2.0/dipcall/dipcall_outfiles/HG002_verkko_2.0_2024_06_05.dipcall
@@ -111,7 +111,9 @@ docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/grou
   --outputProjection /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/hifi_model/HG002_verkko_2.0_hap2_GIAB_conf.projection.bed
 ```
 
-Uploaded for kishwar here:
+Uploaded for Kishwar here:
 ```
 gsutil -o GSUtil:parallel_composite_upload_threshold=50GB -m cp -r verkko_model_truthset_HG002_v0.9 gs://pepper-deepvariant/mira/
+
+gs://pepper-deepvariant/mira/verkko_model_truthset_HG002_v0.9
 ```
