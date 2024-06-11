@@ -1,75 +1,14 @@
 # Parsing DeepPolisher results to get data in the right format for manuscript figures
 
-## Annotating FP kmers, fig2
+## Annotating HG005 FP kmers, fig2
 
-Combine HG002 and HG005 hap FP kmer bedfiles from merqury to use
+Combine HG005 hap FP kmer bedfiles from merqury to use
 ```
-cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.altHap_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.asm_only.bed | bedtools sort -i - | bedtools merge -i - -c 1 -o count > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed
-
-cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.insideConf.subBed.merqury.altHap_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.insideConf.subBed.merqury.asm_only.bed > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.insideConf.subBed.merqury.dip.bed
-
-cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.outsideConf.subBed.merqury.altHap_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.outsideConf.subBed.merqury.asm_only.bed > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/Raw.outsideConf.subBed.merqury.dip.bed
-
-cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.asm_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.altHap_only.bed | bedtools sort -i - | bedtools merge -i - -c 1 -o count > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed
-
-cat
+cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl_k31/HG005_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.asm_only.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl_k31/HG005_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.altHap_only.bed | bedtools sort -i - | bedtools merge -i - -c 1 -o count > /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl_k31/HG005_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed
 ```
 
 project inside and outside conf regions to raw assemblies
 ```
-# HG002 hap1 inside
-
-docker run -it --rm -u `id -u`:`id -g` \
-    -v /private/groups:/private/groups \
-    mobinasri/flagger@sha256:5d738412b56bac5a64227569c1d6e57e7920e3d3e5724c17ab233f92279bcff6 \
-    python3 /home/programs/src/project_blocks_multi_thread.py \
-    --mode "ref2asm" \
-    --paf /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.AP.grch38.paf \
-    --blocks /private/groups/hprc/ref_files/giab/HG002_intersect_HG005_GIAB_v4.2.1.bed \
-    --outputProjectable /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.hap1.projectable.bed \
-    --outputProjection /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.hap1.projection.bed \
-    --threads 16
-
-# HG002 hap2 inside
-docker run -it --rm -u `id -u`:`id -g` \
-    -v /private/groups:/private/groups \
-    mobinasri/flagger@sha256:5d738412b56bac5a64227569c1d6e57e7920e3d3e5724c17ab233f92279bcff6 \
-    python3 /home/programs/src/project_blocks_multi_thread.py \
-    --mode "ref2asm" \
-    --paf /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap2.AP.grch38.paf \
-    --blocks /private/groups/hprc/ref_files/giab/HG002_intersect_HG005_GIAB_v4.2.1.bed \
-    --outputProjectable /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.hap2.projectable.bed \
-    --outputProjection /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.hap2.projection.bed \
-    --threads 16
-
-cat /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.hap2.projection.bed /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.hap1.projection.bed > /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
-
-# HG002 hap1 outside
-docker run -it --rm -u `id -u`:`id -g` \
-    -v /private/groups:/private/groups \
-    mobinasri/flagger@sha256:5d738412b56bac5a64227569c1d6e57e7920e3d3e5724c17ab233f92279bcff6 \
-    python3 /home/programs/src/project_blocks_multi_thread.py \
-    --mode "ref2asm" \
-    --paf /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.AP.grch38.paf \
-    --blocks /private/groups/hprc/ref_files/giab/outside_HG002_intersect_HG005_GIAB_v4.2.1.bed \
-    --outputProjectable /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.hap1.projectable.bed \
-    --outputProjection /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.hap1.projection.bed \
-    --threads 16
-
-# HG002 hap2 outside
-docker run -it --rm -u `id -u`:`id -g` \
-    -v /private/groups:/private/groups \
-    mobinasri/flagger@sha256:5d738412b56bac5a64227569c1d6e57e7920e3d3e5724c17ab233f92279bcff6 \
-    python3 /home/programs/src/project_blocks_multi_thread.py \
-    --mode "ref2asm" \
-    --paf /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.hap2.AP.grch38.paf \
-    --blocks /private/groups/hprc/ref_files/giab/outside_HG002_intersect_HG005_GIAB_v4.2.1.bed \
-    --outputProjectable /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.hap2.projectable.bed \
-    --outputProjection /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.hap2.projection.bed \
-    --threads 16
-
-cat /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.hap2.projection.bed /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.hap1.projection.bed > /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
-
 # HG005 inside hap1
 
 docker run -it --rm -u `id -u`:`id -g` \
@@ -127,15 +66,6 @@ docker run -it --rm -u `id -u`:`id -g` \
 cat /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.hap1.projection.bed /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.hap2.projection.bed > /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
 ```
 
-```
-mkdir -p annotate_fp_kmers
-
-cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl
-
-inside_conf=/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
-outside_conf=/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
-```
-
 ```sh
 # /bin/bash
 
@@ -188,31 +118,28 @@ echo ${sample},${total_fp_kmers},${projected_fp_kmers},${fp_kmers_unchanged_wg},
 ```
 
 ```
-cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl
+cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl_k31
+
+mkdir -p annotate_fp_kmers
 
 echo "sample,total_fp_kmers_wg,projected_fp_kmers_wg,unchanged_fp_kmers_wg,total_fp_kmers_conf,projected_fp_kmers_conf,unchanged_fp_kmers_conf" > ./annotate_fp_kmers/all_results.csv
 
-# HG002 samples
-for sample in HG002_nextPolish2 HG002_deepvariant HG002_y2_DCv1.2_PHv6_mm2_model1_dockerv0.8_HPRC_GQ HG002_t2t_polish
-    do bash annotate_fp_kmers/annotate_fp_kmers.sh ${sample} /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG002_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
-  done
-
 # HG005 samples
 for sample in HG005_nextPolish2 HG005_deepvariant HG005_y2_DCv1.2_PHv6_mm2_model1_dockerv0.8_HPRC_GQ HG005_t2t_polish
-    do bash annotate_fp_kmers/annotate_fp_kmers.sh ${sample} /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
+    do bash annotate_fp_kmers/annotate_fp_kmers.sh ${sample} /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl_k31/HG005_deepvariant/analysis/hprc_polishing_QC_no_meryl_outputs/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.merqury.dip_only.bed /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/grch38/outside_HG002_intersect_HG005_GIAB_v4.2.1.dip.projection.bed
     done
 ```
 
 ### Collecting # FP kmers for all coverage titrations (fig 2 and supplement)
 
 ```sh
-cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_coverage_titrations/hprc_polishing_QC_no_meryl
-cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl
+cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_coverage_titrations/hprc_polishing_QC_no_meryl_k31
+cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/hprc_polishing_QC_no_meryl_k31
 
 mkdir -p count_fp_kmers
 echo "sample_id,fp_kmers_wg,fp_kmers_conf" > all_samples_fp_kmer_counts.csv
 
-cut -f 1 -d "," GIAB_samples_polisher_evaluation_manuscript.csv | grep -v "sample_id" | while read line
+cut -f 1 -d "," GIAB_samples_hprc_deepPolisher_manuscript.csv | grep -v "sample_id" | while read line
     do mkdir -p count_fp_kmers/${line}/wg/
     tar -zxvf ${line}/analysis/hprc_polishing_QC_no_meryl_outputs/*polished.merqury.tar.gz -C count_fp_kmers/${line}/wg/
     fp_kmers_wg=`cat count_fp_kmers/${line}/wg/*.polished.merqury.qv | cut -f2 | tail -n 1`
