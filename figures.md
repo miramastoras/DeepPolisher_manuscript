@@ -180,3 +180,80 @@ for cov in 60x 50x 30x 20x 10x ; do
     done
 
 ```
+
+#### Collecting number of FP kmers from merqury k=31, for raw and polished hprc assemblies
+
+```
+# copy all merqury tar files into new folder
+
+BASE=/private/groups/patenlab/mira/hprc_polishing/figures
+
+cd /private/groups/hprc/polishing/batch2/apply_GQ_filter/hprc_polishing_QC_k31/
+cd /private/groups/hprc/polishing/batch3/apply_GQ_filter/hprc_polishing_QC_k31
+cd /private/groups/hprc/polishing/batch3/apply_GQ_filter/hprc_polishing_QC_k31
+cd /private/groups/hprc/polishing/batch4/apply_GQ_filter/hprc_polishing_QC_k31
+
+ls | grep "HG" | while read line ; do
+    mkdir -p $BASE/${line}_polished
+    mkdir -p $BASE/${line}_raw
+    tar -xf $line/hprc_polishing_QC_outputs/${line}.merqury.tar.gz -C $BASE/${line}_raw
+    tar -xf $line/hprc_polishing_QC_outputs/${line}.polished.merqury.tar.gz -C $BASE/${line}_polished
+done  
+
+cd /private/groups/hprc/polishing/batch5/hprc_polishing_QC_k31
+cd /private/groups/hprc/polishing/batch6/hprc_polishing_QC_k31
+
+ls | grep "HG" | while read line ; do
+    mkdir -p $BASE/${line}_polished
+    mkdir -p $BASE/${line}_raw
+    tar -xf $line/analysis/hprc_polishing_QC_outputs/${line}.xygrouped.merqury.tar.gz -C $BASE/${line}_raw
+    tar -xf $line/analysis/hprc_polishing_QC_outputs/${line}.polished.merqury.tar.gz -C $BASE/${line}_polished
+done  
+
+ls | grep "NA" | while read line ; do
+    mkdir -p $BASE/${line}_polished
+    mkdir -p $BASE/${line}_raw
+    tar -xf $line/analysis/hprc_polishing_QC_outputs/${line}.xygrouped.merqury.tar.gz -C $BASE/${line}_raw
+    tar -xf $line/analysis/hprc_polishing_QC_outputs/${line}.polished.merqury.tar.gz -C $BASE/${line}_polished
+done  
+
+cd /private/groups/hprc/polishing/batch7/hprc_polishing_QC_k31
+cd /private/groups/hprc/polishing/batch8/hprc_polishing_QC_k31
+
+ls | grep "HG" | while read line ; do
+    mkdir -p $BASE/${line}_polished
+    mkdir -p $BASE/${line}_raw
+    tar -xf $line/analysis/hprc_polishing_QC_outputs/${line}.merqury.tar.gz -C $BASE/${line}_raw
+    tar -xf $line/analysis/hprc_polishing_QC_outputs/${line}.polished.merqury.tar.gz -C $BASE/${line}_polished
+done  
+
+ls | grep "NA" | while read line ; do
+    mkdir -p $BASE/${line}_polished
+    mkdir -p $BASE/${line}_raw
+    tar -xf $line/analysis/hprc_polishing_QC_outputs/${line}.merqury.tar.gz -C $BASE/${line}_raw
+    tar -xf $line/analysis/hprc_polishing_QC_outputs/${line}.polished.merqury.tar.gz -C $BASE/${line}_polished
+done
+```
+
+Combine fp kmer counts
+```
+cat samples.txt | while read line ; do
+    pol=`cut -f2 ${line}_polished/${line}.polished.merqury.qv | tail -n 1`
+    raw=`cut -f2 ${line}_raw/${line}.merqury.qv | tail -n 1`
+    echo ${line},raw,${raw} >> all_counts.csv
+    echo ${line},polished,${pol} >> all_counts.csv
+done
+
+cat samples.txt | while read line ; do
+    raw=`cut -f2 ${line}_raw/${line}.xygrouped.merqury.qv | tail -n 1`
+    echo ${line},raw,${raw} >> all_counts.csv
+done
+```
+
+```
+bcftools consensus -H2 \
+    -c /private/groups/patenlab/mira/hprc_polishing/gene_impact/HG005_pat_pol_to_raw.chain \
+    -f /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.pat.fa \
+    /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GQ20_INS1_GQ12_DEL1_GQ5_else/HG005.mm2_model1.polisher_output.GQ20_INS1_GQ12_DEL1_GQ5_else.vcf.gz \
+    -o /private/groups/patenlab/mira/hprc_polishing/gene_impact/HG005.pat.polished.fa
+```

@@ -145,6 +145,7 @@ docker run -u `id -u`:`id -g` \
     --cpus 64
 ```
 
+
 ### Testing polishing in just hifi coverage dropouts regions
 
 1. run mosdepth quantize on HiFi bam
@@ -246,3 +247,51 @@ docker run -u `id -u`:`id -g` \
 5. Subset vcf file to only the bed file of coverage dropouts - so no edits in parts of the reads that hifi touches
 
 6. polish with variants
+
+### Run merqury k=31 QV for chr 20 only
+
+Subset polished DP mm2 model 1 to chr 20
+```
+cat /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.grch38.chr20.full_contigs.mat.bed | cut -f1 | while read line ; do samtools faidx /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.polished.fasta $line >> /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.polished.chr20.fasta ; done
+
+cat /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/dipcall_grch38/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.grch38.chr20.full_contigs.pat.bed | cut -f1 | while read line ; do samtools faidx /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.fasta $line >> /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.chr20.fasta ; done
+```
+
+```
+#!/bin/bash
+#SBATCH --job-name=merqury_chr20_hybrid_model
+#SBATCH --partition=medium
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=16
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+time docker run -it --rm \
+    -v /private/groups:/private/groups \
+    juklucas/hpp_merqury:latest merqury.sh \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG002.ilm.k31.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.pat.chr20.full_contigs.fa /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.mat.chr20.full_contigs.fa \
+    HG002_y2_chr20_raw
+
+# DP hifi mm2
+time docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+    -v /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/evaluation/HG002_y2_mm2_DCv1.2_R10_Dorado_hybrid_model2_chr20/merqury/DP_hifi_mm2_model1:/data \
+    juklucas/hpp_merqury:latest merqury.sh \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG002.ilm.k31.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.chr20.fasta /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.polished.chr20.fasta \
+    HG002_y2_chr20_hifi_mm2_model1
+
+# DP hybrid model2
+time docker run --rm -u `id -u`:`id -g` \
+    -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+    -v /private/groups/patenlab/mira/hprc_polishing/hifi_ONT_combined_model/evaluation/HG002_y2_mm2_DCv1.2_R10_Dorado_hybrid_model2_chr20/merqury/hybrid_model2:/data \
+    juklucas/hpp_merqury:latest merqury.sh \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG002.ilm.k31.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_y2_hybrid_model2_chr20/applyPolish_dipcall_outputs/HG002_y2_hybrid_model2_chr20_hap1.polished.fasta \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_y2_hybrid_model2_chr20/applyPolish_dipcall_outputs/HG002_y2_hybrid_model2_chr20_hap2.polished.fasta \
+    HG002_y2_chr20_hybrid_model2
+```

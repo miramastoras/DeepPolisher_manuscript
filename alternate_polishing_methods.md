@@ -1031,17 +1031,104 @@ Run happy
 bash /private/home/mmastora/progs/scripts/GIAB_happy.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_nextPolish2/dipcall_outfiles/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.hap1.NP2.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_nextPolish2/happy_out HG005
 ```
 
-bash /private/home/mmastora/progs/scripts/GIAB_happy.sh /private/groups/patenlab/mira/hprc_polishing/qv_problems/HPRC_intermediate_asm/GQ_filters/GIAB/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else/applyPolish_dipcall_outputs/HG005_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_y2_DCv1.2_PHv6_mm2_model1_dockerv0.8_HPRC_GQ/happy_out HG005
 
-bash /private/home/mmastora/progs/scripts/GIAB_happy.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG005_y2_DCv1.2_PHv6_DPmm2_model1_docker_v0.0.8_12122023/applyPolish_dipcall_happy/applyPolish_dipcall_outfiles/HG005_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_y2_DCv1.2_PHv6_mm2_model1_dockerv0.8_nofilter/happy_out HG005
+#### Reproduce nextpolish2 polishing on HG005 using our data
 
-bash /private/home/mmastora/progs/scripts/GIAB_happy.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG005_y2_DCv1.2_PHv5_DPmodel5docker_v0.0.8_12122023/applyPolish_dipcall_happy/applyPolish_dipcall_outfiles/HG005_hap1.polished.dipcall.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_y2_DCv1.2_PHv5_winnowmap_model5_dockerv0.8/happy_out HG005
+From https://github.com/Nextomics/NextPolish2/blob/main/doc/benchmark5.md
 
-#### unpolished chr20
-bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIAB_T2T_Q100_conf_beds_concordant_50bp.dipcall_z2k.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG002_y2_unpolished/happy_chr20_out/happy HG002
+```
+# Download NGS data
 
-bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.vcf.gz /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG005_y2_raw/dipCallTar/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIABv4.2.1.confidence.bed /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples_manuscript/applyPolish_dipcall_happy/HG005_y2_unpolished/happy_chr20_out/happy HG005
+srun \
+  --job-name "yak" \
+  --cpus-per-task 32 \
+  --partition medium \
+  --mem 250G \
+  --time 12:00:00 \
+  --pty bash \
+  -i
 
+# Quality control and filtering for illumina
+fastp -t 32 -f 5 -t 5 --cut_front --cut_tail -i /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.30x.fastq -o /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.30x.clean.fastq
+
+Read1 before filtering:
+total reads: 377058477
+total bases: 93790588803
+Q20 bases: 85580716657(91.2466%)
+Q30 bases: 80629417261(85.9675%)
+
+Read1 after filtering:
+total reads: 376644600
+total bases: 86827705843
+Q20 bases: 80120119365(92.2748%)
+Q30 bases: 75896593201(87.4106%)
+
+Filtering result:
+reads passed filter: 376644600
+reads failed due to low quality: 230924
+reads failed due to too many N: 110939
+reads failed due to too short: 72014
+reads with adapter trimmed: 0
+bases trimmed due to adapters: 0
+```
+
+Make yak files
+```
+docker run \
+    -it \
+    -v /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/:/reads/ \
+    -v $(pwd):/data/ \
+    -u 30162:620 \
+    juklucas/hpp_yak:latest \
+    /bin/bash
+
+cd /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal
+
+# Prepare k-mer dataset files
+yak count -t 32 -k 21 -b 37 -o HG005.ilm.30x.clean.k21.yak /reads/HG005.ilm.30x.clean.fastq
+yak count -t 32 -k 31 -b 37 -o HG005.ilm.30x.clean.k31.yak /reads/HG005.ilm.30x.clean.fastq
+
+#!/bin/bash
+#SBATCH --job-name=yak_HG5
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+time docker run --rm -u `id -u`:`id -g` -v /private/groups:/private/groups \
+    juklucas/hpp_yak:latest yak count \
+    -k21 -b37 -t32 \
+    -o /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.30x.clean.k21.yak /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.30x.clean.fastq
+
+time docker run --rm -u `id -u`:`id -g` -v /private/groups:/private/groups \
+    juklucas/hpp_yak:latest yak count \
+    -k31 -b37 -t32 \
+    -o /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.30x.clean.k31.yak /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.30x.clean.fastq
+```
+
+Run nextpolish2 on HG005
+```
+#!/bin/bash
+#SBATCH --job-name=NP_HG5
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=500gb
+#SBATCH --cpus-per-task=32
+#SBATCH --threads-per-core=1
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+source /private/home/mmastora/progs/miniconda3/etc/profile.d/conda.sh
+conda activate nextpolish
+
+time nextPolish2 -t 32 /private/groups/patenlab/masri/hprc/polishing/HG005/HPRC_Y2/trio_hifiasm_0.19.5_DC_1.2/DC_1.2_alignments/diploid/slurm_run/HG005.diploid.trio_hifiasm_0.19.5.DC_1.2.winnowmap_2.03.DC_1.2_40x.bam /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa.gz /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.30x.clean.k21.yak /private/groups/patenlab/mira/hprc_polishing/data/HG005_y2_polishing/alignments/illumina_all_to_one/maternal/HG005.ilm.30x.clean.k31.yak > /private/groups/patenlab/mira/hprc_polishing/y2_alt_polishers/nextpolish2/HG005_y2_winnowmap_HiFi/HG005.trio_hifiasm_0.19.5.DC_1.2_40x.dip.NP2.clean.polished.fa
+```
 
 ### Running deepvariant on pharaoh alignments
 
