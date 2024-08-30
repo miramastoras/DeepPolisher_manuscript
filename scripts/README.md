@@ -20,3 +20,8 @@ Optional arguments:
   -v VCF, --vcf VCF     input vcf file
 
 ```
+
+
+#### 2. Python notebook used for optimizing DeepPolisher GQ filters
+
+`Optimizing_GQ_filters_HPRC_int_asm.ipynb`
