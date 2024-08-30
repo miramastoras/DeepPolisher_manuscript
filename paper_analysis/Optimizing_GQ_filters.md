@@ -32,4 +32,4 @@ for line in HG01975 HG01993 HG04115 HG02129 ; do tar -zxvf ${line}_k21/hprc_poli
 for line in HG01975 HG01993 HG04115 HG02129 ; do tar -zxvf ${line}_k31/hprc_polishing_QC_outputs/${line}.merqury.tar.gz -C ./tmp/ ; totalK=`cat ./tmp/${line}.merqury.altHap_only.bed ./tmp/${line}.merqury.asm_only.bed | wc -l` ; echo counts,${line}_k31,${totalK}; done  | grep counts | cut -f2-3 -d"," >> raw_fp_kmer_counts.csv
 ```
 
-Python notebook used to calculate optimal QV: 
+Python notebook used to calculate optimal QV: https://github.com/miramastoras/DeepPolisher_manuscript/blob/main/scripts/Optimizing_GQ_filters_HPRC_int_asm.ipynb
