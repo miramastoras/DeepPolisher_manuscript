@@ -462,6 +462,41 @@ m64017_200730_190124.fastq	6.69309
 m64017_200802_073944.fastq	4.31361
 ```
 
+HG002 Sequel DC v1.1
+
+(confirmed this was not revio, naming of files was a mistake)
+
+Downloaded from:
+```
+wget https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/04ab5ae4-0170-11ee-904c-0a13c5208311--HPRC_Polishing/HPRC_Y1/HG002/hifi/winnowmap/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.bam
+
+wget https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/04ab5ae4-0170-11ee-904c-0a13c5208311--HPRC_Polishing/HPRC_Y1/HG002/hifi/winnowmap/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.bam.bai
+```
+```
+#!/bin/bash
+#SBATCH --job-name=downsampling_HG002_DCv1.1
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=high_priority
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+#samtools view -s 0.65 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.bam > /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.40x.bam
+
+#samtools index /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.40x.bam
+
+samtools view -s 0.75 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.bam > /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.50x.bam
+
+samtools view -s 0.5 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.bam > /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.30x.bam
+
+samtools view -s 0.3 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.bam > /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.20x.bam
+
+samtools view -s 0.15 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.bam > /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel_Revio_DCv1.1/HG002_DC_v1.1.0_Q20.hifi_dc_1.1.winnowmap_v2.03.10x.bam
+```
+
 hprc DeepPolisher full pipeline: https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/hprc_DeepPolisher/GIAB_samples_manuscript/hprc_DeepPolisher_input_jsons
 
 
