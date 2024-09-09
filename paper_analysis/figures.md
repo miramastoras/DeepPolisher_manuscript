@@ -193,7 +193,7 @@ for cov in 60x 50x 30x 20x 10x ; do
 cd /private/groups/hprc/polishing/
 # collect number of bases inside confidence regions
 for batch in 5 6 7 8 9 10;
-    do ls /private/groups/hprc/polishing/batch${batch}/ | grep HG | while read line
+    do ls /private/groups/hprc/polishing/batch${batch}/ | grep NA | while read line
         do samtools faidx /private/groups/hprc/polishing/batch${batch}/hprc_polishing_QC_k31/${line}/analysis/hprc_polishing_QC_outputs/Polished.hap1.insideConf.subBed.fasta
           HAP1_bases_conf=`awk '{sum+=$2;} END{print sum;}' /private/groups/hprc/polishing/batch${batch}/hprc_polishing_QC_k31/${line}/analysis/hprc_polishing_QC_outputs/Polished.hap1.insideConf.subBed.fasta.fai`
           samtools faidx /private/groups/hprc/polishing/batch${batch}/hprc_polishing_QC_k31/${line}/analysis/hprc_polishing_QC_outputs/Polished.hap2.insideConf.subBed.fasta
@@ -215,4 +215,18 @@ for batch in 2 3 4;
       done
    done
 cd /private/groups/hprc/polishing/batch5/hprc_polishing_QC_k31/NA18522/analysis/hprc_polishing_QC_outputs
+
+cd /private/groups/hprc/polishing/
+# collect number of bases inside confidence regions
+for batch in 5 6 8 9 10;
+    do ls /private/groups/hprc/polishing/batch${batch}/ | grep NA | while read line
+        do samtools faidx /private/groups/hprc/polishing/batch${batch}/hprc_polishing_QC_k31/${line}/analysis/hprc_polishing_QC_outputs/Polished.hap1.insideConf.subBed.fasta
+          HAP1_bases_conf=`awk '{sum+=$2;} END{print sum;}' /private/groups/hprc/polishing/batch${batch}/hprc_polishing_QC_k31/${line}/analysis/hprc_polishing_QC_outputs/Polished.hap1.insideConf.subBed.fasta.fai`
+          samtools faidx /private/groups/hprc/polishing/batch${batch}/hprc_polishing_QC_k31/${line}/analysis/hprc_polishing_QC_outputs/Polished.hap2.insideConf.subBed.fasta
+          HAP2_bases_conf=`awk '{sum+=$2;} END{print sum;}' /private/groups/hprc/polishing/batch${batch}/hprc_polishing_QC_k31/${line}/analysis/hprc_polishing_QC_outputs/Polished.hap2.insideConf.subBed.fasta.fai`
+
+          echo ${line},${HAP1_bases_conf},${HAP2_bases_conf} >> /private/groups/patenlab/mira/hprc_polishing/figures/bases_in_conf_per_sample.csv
+      done
+   done
+
 ```
