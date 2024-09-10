@@ -201,7 +201,7 @@ Save validated coordinates
 for sample in HG002 HG005
     do for asm in pol raw
         do for hap in hap1 hap2
-            do bedtools intersect -wo -a /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_nonsynonymous.projection.bed -b /private/groups/patenlab/mira/data/${sample}_GRCh38_1_22_v4.2.1_benchmark.vcf | sort | uniq | awk '{sum += $4}END{print sum}' > /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_nonsynonymous.projection.VALIDATED.bed
+            do bedtools intersect -wo -a /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_nonsynonymous.projection.bed -b /private/groups/patenlab/mira/data/${sample}_GRCh38_1_22_v4.2.1_benchmark.vcf | sort | uniq > /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_nonsynonymous.projection.VALIDATED.bed
             done
           done
         done
@@ -211,7 +211,6 @@ for sample in HG002 HG005
     do for asm in pol raw
         do for hap in hap1 hap2
             do bedtools intersect -wo -a /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_frameshift.projection.bed -b /private/groups/patenlab/mira/data/${sample}_GRCh38_1_22_v4.2.1_benchmark.vcf | sort | uniq > /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_frameshift.projection.VALIDATED.bed
-            echo ${sample}_${hap}_${asm},$num
             done
           done
         done
@@ -221,8 +220,19 @@ for sample in HG002 HG005
     do for asm in pol raw
         do for hap in hap1 hap2
             do bedtools intersect -wo -a /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_early_stop.projection.bed -b /private/groups/patenlab/mira/data/${sample}_GRCh38_1_22_v4.2.1_benchmark.vcf | sort | uniq > /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_early_stop.projection.VALIDATED.bed
-            echo ${sample}_${hap}_${asm},$num
             done
           done
         done
+```
+
+```
+for sample in HG002 HG005
+    do for asm in pol raw
+        do for hap in hap1 hap2
+           do ls /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_early_stop.projection.VALIDATED.bed
+           ls /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_frameshift.projection.VALIDATED.bed
+           ls /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_nonsynonymous.projection.VALIDATED.bed
+           done
+         done
+       done
 ```
