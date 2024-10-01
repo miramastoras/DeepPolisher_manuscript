@@ -208,3 +208,127 @@ cut -f 1 -d"," /private/groups/patenlab/mira/phoenix_batch_submissions/polishing
 
 
 Submitted to deeppolisher https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/hprc_DeepPolisher/T2T_primates
+
+### Optimizing GQ filters for primates
+
+
+### Apply GQ filtered polishing edits to primates
+
+Filter vcf
+```
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do \
+    UNFILT=/private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/${sample}_verkko_model2/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf.gz
+
+    bcftools view -Oz -i 'FORMAT/GQ>24 && (ILEN = 1)' ${UNFILT} > /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_INS1_GQ24.vcf.gz
+    tabix -p vcf /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_INS1_GQ24.vcf.gz
+
+    bcftools view -Oz -i 'FORMAT/GQ>21 && (ILEN = -1)' ${UNFILT} > /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_DEL1_GQ21.vcf.gz
+    tabix -p vcf /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_DEL1_GQ21.vcf.gz
+
+    bcftools view -Oz -e 'FORMAT/GQ<=13 || (ILEN = 1) || (ILEN = -1)' ${UNFILT} > /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_GQ13.vcf.gz
+    tabix -p vcf /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_GQ13.vcf.gz
+
+    bcftools concat -a -Oz /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_INS1_GQ24.vcf.gz \
+    /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_DEL1_GQ21.vcf.gz \
+    /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_GQ13.vcf.gz \
+    > /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_DP_primate_filters.vcf.gz
+  done
+
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do \
+    tabix -p vcf /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_DP_primate_filters.vcf.gz
+  done
+```
+
+Apply polishing edits
+```
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do \
+    echo $sample
+    bcftools consensus -f /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/diploid/${sample}.dip.20230906.fasta.gz -H 2 /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_DP_primate_filters.vcf.gz > /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/${sample}_verkko_model2/${sample}_verkko_model2.T2T_GQ_DP_polished.dip.fasta
+  done
+
+# mPanPan1
+# Applied 3841 variants
+# mPanTro3
+# Applied 2193 variants
+# mPonAbe1
+# Applied 2205 variants
+# mPonPyg2
+# Applied 2777 variants
+# mSymSyn1
+# Applied 3224 variants
+```
+
+### Run Merqury QV stratifications
+
+Run mosdepth on bam files
+```
+#!/bin/bash
+#SBATCH --job-name=mosdepth_primate
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=short
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=4
+#SBATCH --output=%x.%j.log
+#SBATCH --time=1:00:00
+
+ASM=$1
+BAM=$2
+SAMPLE=$3
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/:/opt/mount \
+    quay.io/biocontainers/mosdepth:0.2.4--he527e40_0 \
+    mosdepth -Q 1 --threads 4 \
+    -f ${ASM} \
+    --quantize 0:5:10:150: \
+    /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth \
+    /private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/phoenix_batch_submissions_manuscript/HG002_verkko2.0_DCv1.2_40x/analysis/hprc_DeepPolisher_outputs/HG002_verkko2.0_DCv1.2_40x_PHARAOH_alignments/HG002_verkko2.0_DCv1.2_40x.hifi.to.diploid.asm.PHARAOH.bam
+
+zcat /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth.quantized.bed.gz | awk '{FS=OFS="\t"}{print $0, ($3-$2)}' > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.tsv
+
+awk 'BEGIN {FS=OFS="\t"} {
+        if ($4 == "0:5") {
+            $4 = "NO_COVERAGE"
+        } else if ($4 == "5:10") {
+            $4 = "LOW_COVERAGE"
+        } else if ($4 == "10:150") {
+            $4 = "CALLABLE"
+        } else if ($4 == "150:inf") {
+            $4 = "HIGH_COVERAGE"
+        }
+        print }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.tsv > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed
+
+grep NO_COVERAGE /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed
+
+awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed  > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ5.bed
+
+
+for SAMPLE in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+  awk 'BEGIN {FS=OFS="\t"} {
+        if ($4 == "0:5") {
+            $4 = "NO_COVERAGE"
+        } else if ($4 == "5:10") {
+            $4 = "LOW_COVERAGE"
+        } else if ($4 == "10:150") {
+            $4 = "CALLABLE"
+        } else if ($4 == "150:inf") {
+            $4 = "HIGH_COVERAGE"
+        }
+        print }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.tsv > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed
+
+  grep NO_COVERAGE /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed
+
+  awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed  > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ5.bed
+done
+```
+
+```
+cd /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth
+
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+  echo sbatch slurm.sh /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/diploid/${sample}.dip.20230906.fasta.gz /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mGorGor1/analysis/hprc_DeepPolisher_outputs/${sample}.hifi.to.diploid.asm.PHARAOH.bam ${sample}
+done
+```

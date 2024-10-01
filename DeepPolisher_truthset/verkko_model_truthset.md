@@ -349,7 +349,7 @@ HG002
 
 ## Creating a truthset for training a DeepPolisher hifi verkko model based off of latest Q100 version 1.1
 
-### 1. Dipcall verkko assembly against truthset (T2T Q100 v0.9)
+### 1. Dipcall verkko assembly against truthset (T2T Q100 v1.1
 
 ```
 #!/bin/bash

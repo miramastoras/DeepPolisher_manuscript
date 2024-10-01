@@ -847,7 +847,7 @@ time docker run --rm -u `id -u`:`id -g` -v /private/groups:/private/groups \
     -k31 -b37 -t32 \
     -o /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/yak_files/HG002.ilm.30x.clean.k31.yak /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/illumina/HG002_HiSeq30x_subsampled_R1.clean.fastq.gz /private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/illumina/HG002_HiSeq30x_subsampled_R2.clean.fastq.gz
 ```
-Run nextpolish2 on HG005
+Run nextpolish2 on HG002
 ```
 #!/bin/bash
 #SBATCH --job-name=NP_HG2
@@ -889,7 +889,7 @@ cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/GIAB_samples
 
 export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
 export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
-export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium --exclude=phoenix-[09,10,22,23,24]"
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium --exclude=phoenix-[09,10,22,23,24,18]"
 export TOIL_COORDINATION_DIR=/data/tmp
 
 mkdir -p toil_logs
