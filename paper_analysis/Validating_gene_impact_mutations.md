@@ -102,6 +102,57 @@ HG005_hap1_pol,44
 HG005_hap2_pol,17
 HG005_hap1_raw,44
 HG005_hap2_raw,17
+
+# Prajna's stop codons fixed
+
+for sample in HG002 HG005
+    do for asm in raw pol
+        do for hap in hap1 hap2
+            do bedtools sort -i /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.bed | awk '{print $1"\t"$2-10"\t"$2+10}'> /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.srt.bed
+            done
+          done
+        done
+
+
+for sample in HG002 HG005
+    do for asm in raw pol
+        do for hap in hap1 hap2
+            do
+            docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+            mobinasri/flagger:latest \
+            python3 /home/programs/src/project_blocks_multi_thread.py \
+            --threads 10 \
+            --mode 'asm2ref' \
+            --paf /private/groups/patenlab/mira/hprc_polishing/gene_impact/paf_files/${sample}_${hap}_${asm}_grch38.paf \
+            --blocks /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.srt.bed \
+            --outputProjectable /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.projectable.bed \
+            --outputProjection /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.projection.bed
+            done
+          done
+        done
+
+
+#
+# count number of projectable mutations
+for sample in HG002 HG005
+    do for asm in raw pol
+        do for hap in hap1 hap2
+            do num=`cat /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.projectable.bed | wc -l`
+            total=`cat /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.srt.bed | wc -l`
+            echo ${sample}_${hap}_${asm},$num, $total
+            done
+          done
+        done
+
+#
+HG002_hap1_raw,37, 36
+HG002_hap2_raw,48, 51
+HG002_hap1_pol,37, 36
+HG002_hap2_pol,48, 51
+HG005_hap1_raw,42, 45
+HG005_hap2_raw,57, 56
+HG005_hap1_pol,42, 44
+HG005_hap2_pol,57, 56
 ```
 
 ```
@@ -189,7 +240,20 @@ for sample in HG002 HG005
     do for asm in pol raw
         do for hap in hap1 hap2
             do num=`bedtools intersect -wo -a /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_early_stop.projection.bed -b /private/groups/patenlab/mira/data/${sample}_GRCh38_1_22_v4.2.1_benchmark.vcf | sort | uniq | awk '{sum += $4}END{print sum}'`
-            echo ${sample}_${hap}_${asm},$num
+            total=`cat /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/genomic_loci_early_stop.bed | wc -l`
+            echo ${sample}_${hap}_${asm},$num,$total
+            done
+          done
+        done
+
+# prajna's fixed early stop
+# early stop
+for sample in HG002 HG005
+    do for asm in pol raw
+        do for hap in hap1 hap2
+            do num=`bedtools intersect -wo -a /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.projection.bed -b /private/groups/patenlab/mira/data/${sample}_GRCh38_1_22_v4.2.1_benchmark.vcf | wc -l`
+            total=`cat  /private/groups/patenlab/mira/hprc_polishing/gene_impact/${sample}_mutation_loci_${hap}_${asm}/${sample}_${asm}_${hap}_stops_gained_loci.bed | wc -l`
+            echo ${sample}_${hap}_${asm},$num,$total
             done
           done
         done

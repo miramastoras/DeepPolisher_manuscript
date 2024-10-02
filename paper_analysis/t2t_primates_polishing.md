@@ -211,6 +211,7 @@ Submitted to deeppolisher https://github.com/miramastoras/phoenix_batch_submissi
 
 ### Optimizing GQ filters for primates
 
+https://github.com/miramastoras/DeepPolisher_manuscript/blob/main/scripts/Optimize_GQ_filters_T2T_primates_verkko_model2.ipynb
 
 ### Apply GQ filtered polishing edits to primates
 
@@ -285,7 +286,7 @@ docker run -u `id -u`:`id -g` \
     -f ${ASM} \
     --quantize 0:5:10:150: \
     /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth \
-    /private/groups/patenlab/mira/hprc_polishing/hprc_deepPolisher_wf_runs/phoenix_batch_submissions_manuscript/HG002_verkko2.0_DCv1.2_40x/analysis/hprc_DeepPolisher_outputs/HG002_verkko2.0_DCv1.2_40x_PHARAOH_alignments/HG002_verkko2.0_DCv1.2_40x.hifi.to.diploid.asm.PHARAOH.bam
+    ${BAM}
 
 zcat /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth.quantized.bed.gz | awk '{FS=OFS="\t"}{print $0, ($3-$2)}' > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.tsv
 
@@ -303,32 +304,27 @@ awk 'BEGIN {FS=OFS="\t"} {
 
 grep NO_COVERAGE /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed
 
-awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed  > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ5.bed
+awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed  > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
 
-
-for SAMPLE in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
-  awk 'BEGIN {FS=OFS="\t"} {
-        if ($4 == "0:5") {
-            $4 = "NO_COVERAGE"
-        } else if ($4 == "5:10") {
-            $4 = "LOW_COVERAGE"
-        } else if ($4 == "10:150") {
-            $4 = "CALLABLE"
-        } else if ($4 == "150:inf") {
-            $4 = "HIGH_COVERAGE"
-        }
-        print }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.tsv > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed
-
-  grep NO_COVERAGE /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.bed > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed
-
-  awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed  > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ5.bed
-done
 ```
 
 ```
 cd /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth
 
 for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
-  echo sbatch slurm.sh /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/diploid/${sample}.dip.20230906.fasta.gz /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mGorGor1/analysis/hprc_DeepPolisher_outputs/${sample}.hifi.to.diploid.asm.PHARAOH.bam ${sample}
+  echo sbatch slurm.sh /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/diploid/${sample}.dip.20230906.fasta.gz /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}/analysis/hprc_DeepPolisher_outputs/${sample}.hifi.to.diploid.asm.PHARAOH.bam ${sample}
 done
 ```
+
+ls | grep GQ | while read line ; do
+    cat ${line}/analysis/applyPolish_outputs/${line}_hap1.polished.fasta ${line}/analysis/applyPolish_outputs/${line}_hap1.polished.fasta > ${line}/analysis/applyPolish_outputs/${line}_dip.polished.fasta
+    samtools faidx ${line}/analysis/applyPolish_outputs/${line}_dip.polished.fasta
+    rm ${line}/analysis/applyPolish_outputs/${line}_dip.polished.fasta
+  done
+
+ls | grep hprcGQ | while read line ; do
+  ls /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${line}/analysis/applyPolish_outputs/${line}_dip.polished.fasta.fai
+  done
+
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do echo /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${sample}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
+done
