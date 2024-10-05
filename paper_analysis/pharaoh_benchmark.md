@@ -713,3 +713,110 @@ java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/home/mmast
   "PHARAOH.sampleName": "String"
 }
 ```
+
+### Reoptimize maxDiv for CCS reads
+
+```
+{
+  "longReadAlignmentScattered.preset": "map-hifi",
+  "longReadAlignmentScattered.alignment.dockerImage": "mobinasri/long_read_aligner:v0.3.3",
+  "longReadAlignmentScattered.assemblyFasta": "/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/assembly/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dip.fa",
+  "longReadAlignmentScattered.enableRunningSecphase": false,
+  "longReadAlignmentScattered.aligner": "minimap2",
+  "longReadAlignmentScattered.alignerOptions": "--cs --eqx -Y -L",
+  "longReadAlignmentScattered.kmerSize": 19,
+  "longReadAlignmentScattered.sampleName": "HG002",
+  "longReadAlignmentScattered.suffix": "mm2v2.26",
+  "longReadAlignmentScattered.readFiles": [
+    "/private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS/m64015_190920_185703.Q20.fastq",
+    "/private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS/m64015_190922_010918.Q20.fastq",
+    "/private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS/m64011_190830_220126.Q20.fastq",
+    "/private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS/m64011_190901_095311.Q20.fastq",
+    "/private/groups/patenlab/mira/hprc_polishing/data/reads/HG002/HiFi_Sequel2_CCS/m64012_190920_173625.Q20.fastq"
+  ]
+}
+```
+
+```
+cd /private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/CCS_40x
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=24:00:00 --partition=long --exclude=phoenix-[09,10,22,23,24,18,15,13,06,01,20,21,07]"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/home/mmastora/progs/flagger/wdls/workflows/long_read_aligner_scattered.wdl \
+    long_read_aligner_scattered_inputs.json \
+    --outputDirectory ./long_read_aligner_scattered_outfiles \
+    --outputFile long_read_aligner_scattered_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    2>&1 | tee log.txt
+
+```
+
+Pull out one contig:
+```
+# overlap with error k-ers to get the erroneous reads
+
+
+```
+
+plot de tag distribution:
+
+```
+import pysam
+from matplotlib import pyplot as plt
+import seaborn as sns
+import numpy as np
+
+bamfile = pysam.AlignmentFile("/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/CCS_40x/long_read_aligner_scattered_outfiles/HG002.mm2v2.26.h1tg000001l.bam", "rb")
+
+de_list=[]
+for read in bamfile.fetch():
+    tag=str(read.get_tag("de"))
+
+    de_list.append(tag)
+
+data=np.array(de_list)
+data = data.astype(float)
+
+# Set the bin size and number of labels on the x-axis
+bin_size = 3e-4
+
+# Create the histogram data
+hist_values, hist_bins = np.histogram(data, bins=int(1 / bin_size))
+
+# Calculate the center of each bin
+bin_centers = (hist_bins[:-1] + hist_bins[1:]) / 2 + bin_size*2
+
+# Plot the histogram as lines
+plt.plot(bin_centers, hist_values, drawstyle='steps-post', linewidth=0.5)
+
+# Set the x-axis tick labels
+x_ticks = np.linspace(min(data), .02, 10)
+
+plt.xticks(x_ticks, fontsize=5)
+plt.xlim([min(data),.02])
+
+# Set labels and title
+plt.xlabel('de Value')
+plt.ylabel('Frequency')
+plt.title('de dist of reads overlapping FP kmers, binsize 3e-3')
+
+
+# Save the plot to an external file (e.g., PNG format)
+plt.savefig('/private/groups/patenlab/mira/hprc_polishing/data/HG002_y2_polishing/alignments/CCS_40x/long_read_aligner_scattered_outfiles/de_dist_3e-4.png', dpi=600)
+
+# Close the plot
+plt.close()
+```

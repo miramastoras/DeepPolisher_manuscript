@@ -259,6 +259,14 @@ for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do \
 # Applied 3224 variants
 ```
 
+Count edits with HPRC filters
+```
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do \
+    HPRCFILT=/private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/${sample}_verkko_model2/analysis/DeepPolisher_outputs/polisher_output.vcf.gz
+    count=`zcat $HPRCFILT | grep -v "^#" | wc -l`
+    echo ${sample},${count}
+    done
+```
 ### Run Merqury QV stratifications
 
 Run mosdepth on bam files
@@ -316,15 +324,80 @@ for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
 done
 ```
 
-ls | grep GQ | while read line ; do
-    cat ${line}/analysis/applyPolish_outputs/${line}_hap1.polished.fasta ${line}/analysis/applyPolish_outputs/${line}_hap1.polished.fasta > ${line}/analysis/applyPolish_outputs/${line}_dip.polished.fasta
-    samtools faidx ${line}/analysis/applyPolish_outputs/${line}_dip.polished.fasta
-    rm ${line}/analysis/applyPolish_outputs/${line}_dip.polished.fasta
-  done
+#### Re-polishing primates with higher coverage
 
-ls | grep hprcGQ | while read line ; do
-  ls /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${line}/analysis/applyPolish_outputs/${line}_dip.polished.fasta.fai
-  done
+### Downsampling and downloading hifi data
 
-for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do echo /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth/${sample}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
-done
+```sh
+#!/bin/bash
+
+#SBATCH --job-name=t2t_primates_hifi_downsample
+#SBATCH --cpus-per-task=32
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mem=200gb
+#SBATCH --threads-per-core=1
+#SBATCH --output=slurm_logs/downsample_%x_%j_%A_%a.log
+#SBATCH --time=12:00:00
+#SBATCH --array=[1-6]%6
+
+set -ex
+
+## Pull samples names from CSV passed to script
+sample_file=$1
+
+# Read the CSV file and extract the sample ID for the current job array task
+# Skip first row to avoid the header
+sample_id=$(awk -F ',' -v task_id=${SLURM_ARRAY_TASK_ID} 'NR>1 && NR==task_id+1 {print $1}' "${sample_file}")
+hifi_reads=$(awk -F ',' -v task_id=${SLURM_ARRAY_TASK_ID} 'NR>1 && NR==task_id+1 {print $4}' "${sample_file}" | sed 's/\"//g' | sed 's/[][]//g')
+downsample=$(awk -F ',' -v task_id=${SLURM_ARRAY_TASK_ID} 'NR>1 && NR==task_id+1 {print $9}' "${sample_file}")
+
+echo $hifi_reads
+
+# Ensure a sample ID is obtained
+if [ -z "${sample_id}" ]; then
+    echo "Error: Failed to retrieve a valid sample ID. Exiting."
+    exit 1
+fi
+
+echo "${sample_id}"
+
+OUTDIR=/private/groups/patenlab/mira/t2t_primates_polishing/reads/hifi/${sample_id}
+mkdir -p ${OUTDIR}
+cd ${OUTDIR}
+
+source /private/home/mmastora/progs/miniconda3/etc/profile.d/conda.sh
+conda activate awscli
+
+## make folder on local node for data
+LOCAL_FOLDER=/data/tmp/$(whoami)/${sample_id}
+mkdir -p ${LOCAL_FOLDER}
+
+aws s3 cp ${hifi_reads} ${LOCAL_FOLDER}
+aws s3 cp ${hifi_reads}.bai ${LOCAL_FOLDER}
+
+HIFI_NAME=`basename ${hifi_reads}`
+
+samtools view -s ${downsample} -b -h -@ 32 ${LOCAL_FOLDER}/${HIFI_NAME} > ${OUTDIR}/${HIFI_NAME}.60x.bam
+samtools index ${OUTDIR}/${HIFI_NAME}.60x.bam
+
+rm -rf /data/tmp/$(whoami)/${sample_id}
+```
+
+```sh
+cd /private/groups/patenlab/mira/t2t_primates_polishing/reads
+
+mkdir -p slurm_logs/
+sbatch downsample_hifi_60x.sh T2T_primates_all_manuscript.csv
+```
+
+List files for spreasheet:
+```
+cd /private/groups/patenlab/mira/t2t_primates_polishing/reads/hifi
+
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1 ; do realpath ${sample}/*.60x.bam ; done
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1 ; do realpath ${sample}/*.60x.bam.bai ; done
+```

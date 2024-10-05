@@ -259,7 +259,7 @@ toil clean ${LOCAL_FOLDER}/jobstore
 
 ```
 grep "total_reads" sample_all.report.tsv > coverage_per_file.tsv
-grep "N50" sample_all.report.tsv | paste -d "\t" coverage_per_file.tsv - > tmp; mv tmp coverage_per_file.tsv
+grep "N50" sample_all.report.tsv | paste -d "\t" coverage_per_file.tsv - > tmp.txt ; mv tmp.txt coverage_per_file.tsv
 awk '{ print $1"\t"$3*$6 / 3000000000 }' coverage_per_file.tsv
 
 
