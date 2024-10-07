@@ -324,7 +324,7 @@ for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
 done
 ```
 
-#### Re-polishing primates with higher coverage
+## Re-polishing primates with higher coverage
 
 ### Downsampling and downloading hifi data
 
@@ -400,4 +400,82 @@ cd /private/groups/patenlab/mira/t2t_primates_polishing/reads/hifi
 
 for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1 ; do realpath ${sample}/*.60x.bam ; done
 for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1 ; do realpath ${sample}/*.60x.bam.bai ; done
+```
+
+### Run Merqury QV stratifications
+
+Run mosdepth on bam files
+```
+#!/bin/bash
+#SBATCH --job-name=mosdepth_primate
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=short
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=4
+#SBATCH --output=%x.%j.log
+#SBATCH --time=1:00:00
+
+ASM=$1
+BAM=$2
+SAMPLE=$3
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/:/opt/mount \
+    quay.io/biocontainers/mosdepth:0.2.4--he527e40_0 \
+    mosdepth -Q 1 --threads 4 \
+    -f ${ASM} \
+    --quantize 0:5:10:150: \
+    /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth \
+    ${BAM}
+
+zcat /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth.quantized.bed.gz | awk '{FS=OFS="\t"}{print $0, ($3-$2)}' > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.tsv
+
+awk 'BEGIN {FS=OFS="\t"} {
+        if ($4 == "0:5") {
+            $4 = "NO_COVERAGE"
+        } else if ($4 == "5:10") {
+            $4 = "LOW_COVERAGE"
+        } else if ($4 == "10:150") {
+            $4 = "CALLABLE"
+        } else if ($4 == "150:inf") {
+            $4 = "HIGH_COVERAGE"
+        }
+        print }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.tsv > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.bed
+
+grep NO_COVERAGE /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.bed > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed
+
+awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.bed  > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
+
+```
+
+```
+cd /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x
+
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+  echo sbatch slurm.sh /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/diploid/${sample}.dip.20230906.fasta.gz /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/${sample}_60x.hifi.to.diploid.asm.PHARAOH.bam ${sample}
+done
+```
+
+list files
+```
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+  realpath /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
+done 
+```
+
+Get polished fai files
+```
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    cat /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/${sample}_60x_Hap2.polished.fasta /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/${sample}_60x_Hap1.polished.fasta > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/${sample}_60x.dip.polished.fasta
+    samtools faidx /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/${sample}_60x.dip.polished.fasta
+    rm /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/${sample}_60x.dip.polished.fasta
+  done
+
+# list files for csv
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    realpath /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/${sample}_60x.dip.polished.fasta.fai
+  done
 ```

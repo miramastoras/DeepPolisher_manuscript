@@ -184,7 +184,8 @@ cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/Merqury_stra
 mkdir diploid_beds
 
 # combine bed files
-cut -f1 -d"," Merqury_stratifications.csv | grep -v "sample_id" | while read line ; do
+cut -f1 -d"," /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | grep -v "sample_id" | while read line ; do
+    echo $line
     Hap1Bed=`grep $line Merqury_stratifications.csv | cut -f10 -d","`
     Hap2Bed=`grep $line Merqury_stratifications.csv | cut -f11 -d","`
     cat $Hap1Bed $Hap2Bed > diploid_beds/${line}_dip.HG002_intersect_HG005_GIAB_v4.2.1.projection.bed
@@ -193,6 +194,7 @@ cut -f1 -d"," Merqury_stratifications.csv | grep -v "sample_id" | while read lin
 mkdir QV_beds
 # subtract from GIAB
 cut -f1 -d"," /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | grep -v "sample_id" | while read line ; do
+    echo $line
     mosdepth=`grep $line /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | cut -f9 -d","`
     bedtools subtract -a diploid_beds/${line}_dip.HG002_intersect_HG005_GIAB_v4.2.1.projection.bed -b ${mosdepth} > QV_beds/${line}_dip.GIAB_conf_projection.gtMAPQ1_5x.bed
   done
