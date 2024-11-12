@@ -447,7 +447,7 @@ awk 'BEGIN {FS=OFS="\t"} {
 
 grep NO_COVERAGE /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.bed > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed
 
-awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.bed  > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
+awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.bed  > /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
 
 ```
 
@@ -463,7 +463,13 @@ list files
 ```
 for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
   realpath /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${SAMPLE}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
-done 
+done
+```
+list bases in files
+```
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+  awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/mosdepth_60x/${sample}_mosdepth_quantized.quant.lt5x_cov.gt100bp.MAPQ1.bed
+done
 ```
 
 Get polished fai files
@@ -478,4 +484,140 @@ for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
 for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
     realpath /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/${sample}_60x.dip.polished.fasta.fai
   done
+```
+Subtract mosdepth files from GIAB beds
+```
+cd /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/Merqury_stratifications/subtract_dropout_from_GIAB
+
+# combine bed files
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    Hap1Bed=`grep ${sample}_60x /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | cut -f10 -d","`
+    Hap2Bed=`grep ${sample}_60x /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | cut -f11 -d","`
+    cat $Hap1Bed $Hap2Bed > diploid_beds/${sample}_60x.HG002_intersect_HG005_GIAB_v4.2.1.projection.bed
+  done
+
+
+mkdir QV_beds
+# subtract from GIAB
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    mosdepth=`grep ${sample}_60x /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | cut -f9 -d","`
+    bedtools subtract -a diploid_beds/${sample}_60x.HG002_intersect_HG005_GIAB_v4.2.1.projection.bed -b ${mosdepth} > QV_beds/${sample}_60x.GIAB_conf_projection.gtMAPQ1_5x.bed
+  done
+
+# list for entry in CSV
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    realpath QV_beds/${sample}_60x.GIAB_conf_projection.gtMAPQ1_5x.bed
+  done
+```
+
+Check number of bases subtracted for each
+```
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    echo $sample
+    mosdepth=`grep ${sample}_60x /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | cut -f9 -d","`
+    bedtools intersect -a diploid_beds/${sample}_60x.HG002_intersect_HG005_GIAB_v4.2.1.projection.bed -b ${mosdepth} | awk '{sum += $3-$2}END{print sum}'
+    awk '{sum += $3-$2}END{print sum}' diploid_beds/${sample}_60x.HG002_intersect_HG005_GIAB_v4.2.1.projection.bed
+  done
+```
+
+Repeat for raw samples
+```
+# subtract from GIAB
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    mosdepth=`grep ${sample}_raw /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | cut -f9 -d","`
+    bedtools subtract -a diploid_beds/${sample}_raw_dip.HG002_intersect_HG005_GIAB_v4.2.1.projection.bed -b ${mosdepth} > QV_beds/${sample}_raw_dip.GIAB_conf_projection.gtMAPQ1_5x.bed
+  done
+
+# count number of bases
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    mosdepth=`grep ${sample}_raw /private/groups/patenlab/mira/phoenix_batch_submissions/polishing/merqury_stratifications/DeepPolisher_manuscript/Merqury_stratifications.csv | cut -f9 -d","`
+    bedtools subtract -a diploid_beds/${sample}_raw_dip.HG002_intersect_HG005_GIAB_v4.2.1.projection.bed -b ${mosdepth} | awk '{sum += $3-$2}END{print sum}'
+  done
+
+  4853857828
+  4823181718
+  4314280499
+  4456343670
+  3913585269
+
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+awk '{sum += $3-$2}END{print sum}' QV_beds/${sample}_raw_dip.GIAB_conf_projection.gtMAPQ1_5x.bed
+done
+```
+
+Count number of edits
+```
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+num=`zcat /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/polisher_output.vcf.gz | grep -v "^#" | wc -l`
+echo ${sample},${num}
+done
+
+for sample in mGorGor1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+num=`zcat /private/groups/patenlab/mira/t2t_primates_polishing/hprc_DeepPolisher/${sample}_60x/analysis/hprc_DeepPolisher_outputs/polisher_output.no_filters.vcf.gz | grep -v "^#" | wc -l`
+echo ${sample},${num}
+done
+```
+Run polishing with no filters
+```
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do \
+    echo $sample
+    bcftools consensus -f /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/diploid/${sample}.dip.20230906.fasta.gz -H 2 /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/verkko_model2_primate_optimized_filters/${sample}_DP_primate_filters.vcf.gz > /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/${sample}_verkko_model2/${sample}_verkko_model2.T2T_GQ_DP_polished.dip.fasta
+  done
+```
+Get dip fai for 60x run
+```
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    cat /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_hap1.polished.fasta /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_hap2.polished.fasta > /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_dip.polished.fasta
+
+    samtools faidx /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_dip.polished.fasta
+    rm /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_dip.polished.fasta
+  done
+
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    realpath /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_dip.polished.fasta.fai
+    done
+```
+
+```
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    cat /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2_hprc_filters/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_hprc_filters_hap1.polished.fasta /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2_hprc_filters/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_hprc_filters_hap2.polished.fasta > /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2_hprc_filters/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_hprc_filters_dip.polished.fasta
+
+    samtools faidx /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2_hprc_filters/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_hprc_filters_dip.polished.fasta
+    rm /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2_hprc_filters/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_hprc_filters_dip.polished.fasta
+  done
+
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    realpath /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/applyPolish/${sample}_60x_verkko_model2_hprc_filters/analysis/applyPolish_outputs/${sample}_60x_verkko_model2_hprc_filters_dip.polished.fasta.fai
+    done
+```
+
+```
+for sample in mGorGor1 mPanPan1 mPanTro3 mPonAbe1 mPonPyg2 mSymSyn1; do
+    echo $sample
+    zcat /private/groups/patenlab/mira/t2t_primates_polishing/DeepPolisher/${sample}_60x_verkko_model2/analysis/DeepPolisher_outputs/polisher_output.vcf.gz | grep -v "^#" | wc -l
+  done
+```
+
+Run read stats for child illumina
+```
+
+```
+
+```
+#!/bin/bash
+#SBATCH --job-name=meryl
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=128gb
+#SBATCH --cpus-per-task=32
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+
+export PATH=/private/home/mmastora/progs/meryl-1.4.1/bin:$PATH
+
+meryl count threads=32 k=31 /private/nanopore/basecalled/marmoset/Illumina_WGS/240_GT24-00124_GTTACGCANNNNNNNNN-ATGGCGAT_S113_L006_R1_001.fastq.gz /private/nanopore/basecalled/marmoset/Illumina_WGS/240_GT24-00124_GTTACGCANNNNNNNNN-ATGGCGAT_S113_L006_R2_001.fastq.gz /private/nanopore/basecalled/marmoset/Illumina_WGS/240_GT24-00124_GTTACGCANNNNNNNNN-ATGGCGAT_S113_L007_R1_001.fastq.gz /private/nanopore/basecalled/marmoset/Illumina_WGS/240_GT24-00124_GTTACGCANNNNNNNNN-ATGGCGAT_S113_L007_R2_001.fastq.gz output /private/groups/patenlab/mira/t2t_primates_polishing/reads/ilm/Baguette/Baguette.ilm.k31.30x.meryl
+
+tar -cvf /private/groups/patenlab/mira/t2t_primates_polishing/reads/ilm/Baguette/Baguette.ilm.k31.30x.meryl.tar /private/groups/patenlab/mira/t2t_primates_polishing/reads/ilm/Baguette/Baguette.ilm.k31.30x.meryl
 ```

@@ -36,4 +36,7 @@ Baguette_3 	 93075 	 56.85 	 17.23 	 7.97
 ls | grep "dorado0.5.3" | grep ".bam" | while read line ;do realpath $line ;done
 ```
 
-Run read_stats to get coverage of illumina 
+Run illumina meryl
+```
+
+```

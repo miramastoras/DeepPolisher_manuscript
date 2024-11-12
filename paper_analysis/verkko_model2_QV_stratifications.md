@@ -29,7 +29,7 @@ cat /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/Merqury_str
 
 bedtools subtract \
     -a /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/Merqury_stratifications/align_asm_project_blocks/HG005_verkko_raw/analysis/align_asm_project_blocks_outputs/assembly.asmToRefDip_HG002_intersect_HG005_GIAB_v4.2.1.projection.bed \
-    -b /private/groups/patenlab/mira/hprc_polishing/verkko_model_debug/HG005_QV/exclude_ONT_gaps/final_ont.gaps.polished_projection.bed \
+    -b /private/groups/patenlab/mira/hprc_polishing/verkko_model_debug/HG005_QV/final_ont.gaps.bed | bedtools sort -i - | bedtools merge -i - \
     > /private/groups/patenlab/mira/hprc_polishing/verkko_model_debug/HG005_QV/exclude_ONT_gaps/HG005.verkko.raw.dip.GIAB_conf.projection.no_ont_gaps.bed
 ```
 
@@ -68,6 +68,22 @@ time docker run --rm -u `id -u`:`id -g` \
     /private/groups/patenlab/mira/hprc_polishing/verkko_model_debug/HG005_QV/exclude_ONT_gaps/HG005.verkko.polished.dip.GIAB_conf.projection.no_ont_gaps.fa \
     merqury_polished_verkko
 ```
+
+```
+docker run \
+    -it \
+    -v /private/groups/:/private/groups/ \
+    -v $(pwd):/data/ \
+    -u 30162:620 \
+    juklucas/hpp_merqury@sha256:387bb58c820c5825e8cf29bc0f8678975ae6a9e6d350c56d5eb5865a6d3d5e82 \
+    /bin/bash
+
+    merqury.sh \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/meryl_dbs/HG005.ilm.k31.30x.meryl \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_debug/HG005_QV/exclude_ONT_gaps/HG005.verkko.raw.dip.GIAB_conf.projection.no_ont_gaps.fa \
+    merqury_raw_verkko
+```
+
 Percent of genome
 ```
 awk '{sum += $3-$2}END{print sum}'  /private/groups/patenlab/mira/hprc_polishing/verkko_model_debug/HG005_QV/exclude_ONT_gaps/HG005.verkko.raw.dip.GIAB_conf.projection.no_ont_gaps.bed
