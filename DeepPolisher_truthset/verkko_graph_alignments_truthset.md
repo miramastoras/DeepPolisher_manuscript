@@ -174,3 +174,11 @@ Uploaded for kishwar:
 ```
 gsutil -o GSUtil:parallel_composite_upload_threshold=50GB -m cp -r verkko_graph_alignments_Q100v1.1_truthset gs://pepper-deepvariant/mira/
 ```
+
+#### Test on chr 20
+
+```
+samtools view -bh verkko_assembly.bam haplotype2-0000081 haplotype1-0000017 > verkko_assembly.chr20.bam
+samtools index verkko_assembly.chr20.bam
+```
+https://docs.google.com/spreadsheets/d/1zQ1ICWvyYBqy_7L7vS6QsvlwGJyMIbwQrcZxH_Cbu1g/edit?gid=1300297667#gid=1300297667
