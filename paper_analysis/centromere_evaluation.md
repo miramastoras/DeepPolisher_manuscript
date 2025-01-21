@@ -266,3 +266,51 @@ SN	0	number of indels:	3727
 SN	0	number of others:	0
 SN	0	number of multiallelic sites:	870
 ```
+Repeat for polished assembly
+subset bam file to regions of mapq 60
+```
+samtools view -bh -q 60 /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_mat/dipcall_outfiles/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.copy.polished.dipcall/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.copy.polished.hap2.bam > /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_mat/dipcall_outfiles/HG002.polished.mat.MAPQ60.bam
+
+docker run --rm -it  -u `id -u`:`id -g` \
+    -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+    mobinasri/flagger:latest bedtools bamtobed \
+    -i /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_mat/dipcall_outfiles/HG002.polished.mat.MAPQ60.bam \
+    | bedtools sort -i - | bedtools merge -i - \
+    > /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_mat/dipcall_outfiles/dipcall_HG002_pol_to_Q100_mat.Q60.bed
+```
+Intersect with censat bed
+```
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_mat/dipcall_outfiles/dipcall_HG002_pol_to_Q100_mat.Q60.bed -b /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/hg002v1.1.cenSatv2.0.noheader.lifted_from_v1.0.1.bed | awk '{sum += $3-$2}END{print sum}'
+
+270440101
+```
+Intersect with dipcall vcf
+```
+# Count number of SNPs and indels in dipcall vcf
+
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_mat/dipcall_outfiles/dipcall_HG002_pol_to_Q100_mat.Q60.bed -b /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/hg002v1.1.cenSatv2.0.noheader.lifted_from_v1.0.1.bed | bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_mat/dipcall_outfiles/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.copy.polished.dipcall/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap2.copy.polished.pair.vcf.gz -b - | bcftools stats | head -n 30
+```
+Repeat for polished, pat
+```
+samtools view -bh -q 60 /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_pat/dipcall_outfiles/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.copy.polished.dipcall/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.copy.polished.hap1.bam > /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_pat/dipcall_outfiles/HG002.polished.pat.MAPQ60.bam
+
+docker run --rm -it  -u `id -u`:`id -g` \
+    -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+    mobinasri/flagger:latest bedtools bamtobed \
+    -i /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_pat/dipcall_outfiles/HG002.polished.pat.MAPQ60.bam \
+    | bedtools sort -i - | bedtools merge -i - \
+    > /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_pat/dipcall_outfiles/dipcall_HG002_pol_to_Q100_pat.Q60.bed
+```
+Intersect with censat bed
+```
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_pat/dipcall_outfiles/dipcall_HG002_pol_to_Q100_pat.Q60.bed -b /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/hg002v1.1.cenSatv2.0.noheader.lifted_from_v1.0.1.bed | awk '{sum += $3-$2}END{print sum}'
+
+270440101
+```
+
+Intersect with dipcall vcf
+```
+# Count number of SNPs and indels in dipcall vcf
+
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_pat/dipcall_outfiles/dipcall_HG002_pol_to_Q100_pat.Q60.bed -b /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/hg002v1.1.cenSatv2.0.noheader.lifted_from_v1.0.1.bed | bedtools intersect -header -a /private/groups/patenlab/mira/hprc_polishing/centromere_evaluation/dipcall_HG002_pol_to_Q100_pat/dipcall_outfiles/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.copy.polished.dipcall/HG002_GQ20_INS1_GQ12_DEL1_GQ5_else_hap1.copy.polished.pair.vcf.gz -b - | bcftools stats | head -n 30
+```

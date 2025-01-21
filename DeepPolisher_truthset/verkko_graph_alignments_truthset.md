@@ -182,3 +182,259 @@ samtools view -bh verkko_assembly.bam haplotype2-0000081 haplotype1-0000017 > ve
 samtools index verkko_assembly.chr20.bam
 ```
 https://docs.google.com/spreadsheets/d/1zQ1ICWvyYBqy_7L7vS6QsvlwGJyMIbwQrcZxH_Cbu1g/edit?gid=1300297667#gid=1300297667
+
+Polish assembly
+```
+bcftools consensus -H2 -f /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_graph_alignments_Q100v1.1_truthset/HG002_verkko_2.2_chr20.fasta /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/HG002_verkko_2.2_chr20.checkpoint34.fasta
+
+
+
+```
+Dipcall:
+```
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/HG002_verkko_2.2_chr20.checkpoint34.hap1.fasta",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/HG002_verkko_2.2_chr20.checkpoint34.hap2.fasta",
+  "runDipcall.dipcall.referenceIsHS38": true,
+  "dipcall.isMaleSample":true
+}
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_graph_alignments_Q100v1.1_truthset/HG002_verkko_2.2_chr20.hap1.fasta",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_graph_alignments_Q100v1.1_truthset/HG002_verkko_2.2_chr20.hap2.fasta",
+  "runDipcall.dipcall.referenceIsHS38": true,
+  "dipcall.isMaleSample":true
+}
+```
+```
+#!/bin/bash
+#SBATCH --job-name=dipcall_truthset
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=4
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+#SBATCH --exclude=phoenix-[09,10,22,23,24,18]
+
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_raw
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium --exclude=phoenix-[09,10,22,23,24,18]"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/dipcall.wdl \
+    dipcall_inputs.json \
+    --outputDirectory ./dipcall_outfiles \
+    --outputFile dipcall_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
+hap.py
+```
+bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/dipcall_outfiles/HG002_verkko_2.2_chr20.checkpoint34.hap2.dipcall.vcf.gz \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIAB_T2T_Q100_conf_beds_concordant_50bp.dipcall_z2k.bed \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy \
+    HG002
+
+s
+bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_raw/dipcall_outfiles/HG002_verkko_2.2_chr20.hap2.dipcall.vcf.gz \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIAB_T2T_Q100_conf_beds_concordant_50bp.dipcall_z2k.bed \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_raw/happy/happy \
+    HG002
+```
+Run dipcall on whole genome raw
+```
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/HG002_verkko2.2.haplotype1.maternal.fasta",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/HG002_verkko2.2.haplotype2.paternal.fasta",
+  "runDipcall.dipcall.referenceIsHS38": true,
+  "dipcall.isMaleSample":true
+}
+```
+```
+
+```
+
+```
+#!/bin/bash
+#SBATCH --job-name=dipcall_truthset
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=4
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+#SBATCH --exclude=phoenix-[09,10,22,23,24,18]
+
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/whole_genome_dipcall/dipcall_raw
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium --exclude=phoenix-[09,10,22,23,24,18]"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/dipcall.wdl \
+    dipcall_inputs.json \
+    --outputDirectory ./dipcall_outfiles \
+    --outputFile dipcall_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
+```
+bash /private/home/mmastora/progs/scripts/GIAB_happy.sh \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/whole_genome_dipcall/dipcall_raw/dipcall_outfiles/HG002_verkko2.2.haplotype2.dipcall.vcf.gz \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIAB_T2T_Q100_conf_beds_concordant_50bp.dipcall_z2k.bed \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/whole_genome_dipcall/dipcall_raw/happy/happy \
+    HG002
+```
+
+Look at some FP FN calls in IGV
+
+Convert FP / FN variants to bed
+```
+grep "^#" /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy.vcf > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy.FPFN.vcf
+
+grep -v "^#" /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy.vcf | grep ":F" >> /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy.FPFN.vcf
+
+export PATH=$PATH:/private/home/mmastora/progs/bin/
+/private/home/mmastora/progs/bin/vcf2bed --do-not-split < /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy.FPFN.vcf | awk '{print $1"\t"$2-10"\t"$3+10"\t"$6"\t"$7"\t"$10"\t"$11"\t"$12}' > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy.FPFN.vcf.10bp.bed
+```
+
+Project polished asm TP/FP/FN to raw assembly
+```
+# 3. Project GIAB confidence bedfile to y2 assembly, each haplotype separately
+# Hap1
+docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+  mobinasri/flagger:latest \
+  python3 /home/programs/src/project_blocks_multi_thread.py \
+  --threads 10 \
+  --mode 'ref2asm' \
+  --paf /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_raw/dipcall_outfiles/HG002_verkko_2.2_chr20.hap1.paf \
+  --blocks /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy.FPFN.vcf.10bp.bed \
+  --outputProjectable /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/polished_FP_FN.projectable.hap1.bed \
+  --outputProjection /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/polished_FP_FN.projection.hap1.bed
+
+s
+docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+  mobinasri/flagger:latest \
+  python3 /home/programs/src/project_blocks_multi_thread.py \
+  --threads 10 \
+  --mode 'ref2asm' \
+  --paf /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_raw/dipcall_outfiles/HG002_verkko_2.2_chr20.hap2.paf \
+  --blocks /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy/happy.FPFN.vcf.10bp.bed \
+  --outputProjectable /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/polished_FP_FN.projectable.hap2.bed \
+  --outputProjection /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/polished_FP_FN.projection.hap2.bed
+
+cat /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/polished_FP_FN.projection.hap2.bed /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/polished_FP_FN.projection.hap1.bed > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/polished_FP_FN.projection.dip.bed
+```
+
+```
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/polished_FP_FN.projection.dip.bed -b /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf.gz
+```
+#### Testing checkpoint 505
+
+```
+bcftools consensus -H2 -f /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_graph_alignments_Q100v1.1_truthset/HG002_verkko_2.2_chr20.hap1.fasta /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20_checkpoint505/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/HG002_verkko_2.2_chr20.checkpoint505.hap1.fasta
+
+bcftools consensus -H2 -f /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_graph_alignments_Q100v1.1_truthset/HG002_verkko_2.2_chr20.hap2.fasta /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20_checkpoint505/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/HG002_verkko_2.2_chr20.checkpoint505.hap2.fasta
+```
+dipcall
+```
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/HG002_verkko_2.2_chr20.checkpoint505.hap1.fasta",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/HG002_verkko_2.2_chr20.checkpoint505.hap2.fasta",
+  "runDipcall.dipcall.referenceIsHS38": true,
+  "dipcall.isMaleSample":true
+}
+```
+```
+#!/bin/bash
+#SBATCH --job-name=dipcall_truthset
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=4
+#SBATCH --output=%x.%j.log
+#SBATCH --time=12:00:00
+#SBATCH --exclude=phoenix-[09,10,22,23,24,18]
+
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/dipcall_pol
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium --exclude=phoenix-[09,10,22,23,24,18]"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --batchLogsDir ./toil_logs \
+    /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/tasks/dipcall.wdl \
+    dipcall_inputs.json \
+    --outputDirectory ./dipcall_outfiles \
+    --outputFile dipcall_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
+run happy
+```
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/dipcall_pol
+
+bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/dipcall_pol/dipcall_outfiles/HG002_verkko_2.2_chr20.checkpoint505.hap2.dipcall.vcf.gz \
+    /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIAB_T2T_Q100_conf_beds_concordant_50bp.dipcall_z2k.bed \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/dipcall_pol/happy \
+    HG002
+```
+export PATH=$PATH:/private/home/mmastora/progs/bin/
+/private/home/mmastora/progs/bin/vcf2bed --do-not-split < /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20_checkpoint505/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf > /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20_checkpoint505/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf.bed
+
+
+bedtools intersect -b /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20_checkpoint505/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf -a /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_graph_alignments_Q100v1.1_truthset/HG002_verkko_2.2_GIAB_confident_regions.diploid.projection.fix.bed | sort | uniq | wc -l
