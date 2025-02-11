@@ -172,12 +172,10 @@ bcftools stats /private/groups/patenlab/mira/hprc_polishing/element_polishing/De
 
 located under phoenix batch submissions github: https://github.com/miramastoras/phoenix_batch_submissions/tree/main/polishing/applyPolish_dipcall_happy/GIAB_samples_manuscript
 
-### 4. Investigate missing variants
-
 
 ## Polishing with heterozygous variants - adapting PHARAOH to phase element reads using hifi information
 
-Align element reads to the diploid polished assembly
+### Align element reads to the diploid polished assembly
 ```
 #!/bin/bash
 #SBATCH --job-name=element_all_to_dip
@@ -204,7 +202,7 @@ samtools sort -T /data/tmp/mira/ -@32 /private/groups/patenlab/mira/hprc_polishi
 samtools index /private/groups/patenlab/mira/hprc_polishing/element_polishing/DeepPolisher_assemblies/alignments/HG002_y2_DCv1.2_PHv6_DPmm2_model1_dockerv0.8_HPRC_GQ/50x_element_google_dip/HG002.50x_element_google_dip.hprc_polished.srt.bam
 ```
 
-Align HiFi reads all to mat and all to pat
+### Align HiFi reads all to mat and all to pat
 ```
 {
   "longReadAlignmentScattered.preset": "map-hifi",
@@ -220,7 +218,7 @@ Align HiFi reads all to mat and all to pat
 }
 ```
 
-Align HiFi reads all to mat and all to pat
+### Align HiFi reads all to mat and all to pat
 ```
 {
   "longReadAlignmentScattered.preset": "map-hifi",
@@ -276,7 +274,7 @@ time toil-wdl-runner \
     2>&1 | tee log.txt
 ```
 
-Run PHARAOH using 1000bp as the "homozygous" region length
+### Run PHARAOH using 1000bp as the "homozygous" region length
 
 ```
 java -jar /private/home/mmastora/progs/womtool-85.jar inputs /private/groups/hprc/polishing/hpp_production_workflows/QC/wdl/workflows/PHARAOH.wdl
@@ -346,11 +344,6 @@ toil-wdl-runner \
     2>&1 | tee log.txt
 
 toil clean ${LOCAL_FOLDER}/jobstore
-```
-
-Run deepvariant
-```
-
 ```
 
 ## Polishing HG005 assembly with a second round of element-deepvariant calls
