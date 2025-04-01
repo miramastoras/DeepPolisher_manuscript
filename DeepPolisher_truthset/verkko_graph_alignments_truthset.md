@@ -186,9 +186,6 @@ https://docs.google.com/spreadsheets/d/1zQ1ICWvyYBqy_7L7vS6QsvlwGJyMIbwQrcZxH_Cb
 Polish assembly
 ```
 bcftools consensus -H2 -f /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_graph_alignments_Q100v1.1_truthset/HG002_verkko_2.2_chr20.fasta /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf.gz > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/HG002_verkko_2.2_chr20.checkpoint34.fasta
-
-
-
 ```
 Dipcall:
 ```
@@ -263,6 +260,23 @@ bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
     /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_raw/happy/happy \
     HG002
 ```
+Test on straight v4.2.1 without intersection with Q100
+```
+bedtools intersect -a /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/whole_genome_dipcall/dipcall_raw/dipcall_outfiles/HG002_verkko2.2.haplotype2.dipcall.bed -b /private/groups/patenlab/mira/data/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/whole_genome_dipcall/dipcall_raw/dipcall_outfiles/HG002_verkko2.2.haplotype2.dipcall.GIABv4.2.1_benchmark_noinconsistent.bed
+
+bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/dipcall_outfiles/HG002_verkko_2.2_chr20.checkpoint34.hap2.dipcall.vcf.gz \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/whole_genome_dipcall/dipcall_raw/dipcall_outfiles/HG002_verkko2.2.haplotype2.dipcall.GIABv4.2.1_benchmark_noinconsistent.bed \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_pol/happy_GIABv4.2.1/happy \
+    HG002
+
+bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_raw/dipcall_outfiles/HG002_verkko_2.2_chr20.hap2.dipcall.vcf.gz \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/whole_genome_dipcall/dipcall_raw/dipcall_outfiles/HG002_verkko2.2.haplotype2.dipcall.GIABv4.2.1_benchmark_noinconsistent.bed \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint34/dipcall_raw/happy_GIABv4.2.1/happy \
+    HG002
+```
+
 Run dipcall on whole genome raw
 ```
 {
@@ -432,9 +446,53 @@ bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
     /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/y2_terra_tables/y2_polisher_evaluation/HG002_y2_raw/dipCallTar/HG002.trio_hifiasm_0.19.5.DC_1.2_40x.dipcall.GIAB_T2T_Q100_conf_beds_concordant_50bp.dipcall_z2k.bed \
     /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/dipcall_pol/happy \
     HG002
-```
+
+s
+bash /private/home/mmastora/progs/scripts/GIAB_happy_chr20.sh \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/dipcall_pol/dipcall_outfiles/HG002_verkko_2.2_chr20.checkpoint505.hap2.dipcall.vcf.gz \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/whole_genome_dipcall/dipcall_raw/dipcall_outfiles/HG002_verkko2.2.haplotype2.dipcall.GIABv4.2.1_benchmark_noinconsistent.bed \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/test_chr20_checkpoint505/dipcall_pol_GIAB_4.2.1/happy \
+    HG002
+
 export PATH=$PATH:/private/home/mmastora/progs/bin/
 /private/home/mmastora/progs/bin/vcf2bed --do-not-split < /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20_checkpoint505/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf > /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20_checkpoint505/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf.bed
 
 
 bedtools intersect -b /private/groups/patenlab/mira/phoenix_batch_executions/workflows/DeepPolisher/HG002_verkko_graph_alignment_chr20_checkpoint505/analysis/DeepPolisher_outputs/polisher_output.no_filters.vcf -a /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_graph_alignments_Q100v1.1_truthset/HG002_verkko_2.2_GIAB_confident_regions.diploid.projection.fix.bed | sort | uniq | wc -l
+```
+#### Downsample verkko bam to 20x
+
+First check avg coverage with mosdepth
+```
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/mosdepth/:/opt/mount \
+    quay.io/biocontainers/mosdepth:0.2.4--he527e40_0 \
+    mosdepth -n --fast-mode -t 4 /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/mosdepth/verkko_graph_alignment_HG002 \
+    /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_assembly.bam
+
+source /private/home/mmastora/progs/miniconda3/etc/profile.d/conda.sh
+conda activate analysis
+
+python3 ~/progs/mosdepth/scripts/plot-dist.py verkko_graph_alignment_HG002.mosdepth.global.dist.txt &> coverages.txt
+
+# 31 x total
+```
+Downsample
+```
+#!/bin/bash
+#SBATCH --job-name=downsample_verkko
+#SBATCH --cpus-per-task=32
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --partition=medium
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mem=200gb
+#SBATCH --threads-per-core=1
+#SBATCH --time=12:00:00
+
+samtools view -s .67 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_assembly.bam > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_assembly.20x.bam
+
+samtools index /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_assembly.20x.bam
+```

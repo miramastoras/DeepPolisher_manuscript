@@ -1,13 +1,14 @@
 ## Manual investigation of HG005 GIAB FP / FN variants alongside QV
 
-In this analysis, we are gathering files for viewing in IGV to perform a manual investigation into the cause of the vastly different error rates suggested by the GIAB variants and the QV score 
+In this analysis, we are gathering files for viewing in IGV to perform a manual investigation into the cause of the vastly different error rates suggested by the GIAB variants and the QV score
 
 Directory for analysis:
 ```
 /private/groups/patenlab/mira/hprc_polishing/investigate_variants/HG005_DCv1.2_PHv6_DPmm2_model1/QV_GIAB_concordance/
 ```
 
-### 1. Polishing edits annotated by inducing fp kmers, neutral, unchanging, fixing fp kmers,
+### 1. Polishing edits annotated by inducing fp kmers, neutral, unchanging, fixing fp kmers
+
 as well as bed files for the projected FP kmers from merqury
 ```
 cp /private/groups/patenlab/mira/hprc_polishing/polisher_evaluation/HG005_y2_DCv1.2_PHv6_DPmm2_model1_docker_v0.0.8_12122023/annotate_edit_with_fp_kmers/HG005_mm2_model1_k31/annotate_edit_with_fp_kmers_outputs/* /private/groups/patenlab/mira/hprc_polishing/investigate_variants/HG005_DCv1.2_PHv6_DPmm2_model1/QV_GIAB_concordance/

@@ -129,4 +129,54 @@ cat /private/groups/patenlab/mira/phoenix_batch_executions/workflows/hprc_DeepPo
 awk '{sum += $3-$2}END{print sum}' /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/Baguette/confidence_regions/baguette_hifiasm_confidence.mosdepth_mapQ1_lt5x_cov.gt100bp.dip.bed
 
 500714241 / 5697787823 = 8.7% of genome
+
+awk '{sum += $3-$2}END{print sum}'  /private/groups/patenlab/mira/phoenix_batch_executions/workflows/hprc_DeepPolisher/Baguette_hifiasm_hic/analysis/hprc_DeepPolisher_outputs/mosdepth/Baguette_hic_hifiasm_dip.quantized_mapQ1.quant.lt5x_cov.gt100bp.bed
+
+334545545 / 5697787823 = 5.8 % of genome
+```
+
+Test mosdepth regions for Maisie
+```
+#!/bin/bash
+#SBATCH --job-name=mosdepth
+#SBATCH --mail-type=FAIL,END
+#SBATCH --partition=short
+#SBATCH --mail-user=mmastora@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=256gb
+#SBATCH --cpus-per-task=4
+#SBATCH --output=%x.%j.log
+#SBATCH --time=1:00:00
+
+docker run -u `id -u`:`id -g` \
+    -v /private/groups:/private/groups \
+    -v /private/groups/patenlab/mira/phoenix_batch_executions/workflows/hprc_DeepPolisher/Maisie_hifiasm_hic/analysis/hprc_DeepPolisher_outputs/mosdepth/:/opt/mount \
+    quay.io/biocontainers/mosdepth:0.2.4--he527e40_0 \
+    mosdepth -Q1 --threads 4 \
+    -f /private/groups/patenlab/mira/t2t_primates_polishing/assemblies/Maisie/Maisie_hifiasm_hic_final.dip.fa \
+    --quantize 0:5:10:150: \
+    /private/groups/patenlab/mira/phoenix_batch_executions/workflows/hprc_DeepPolisher/Maisie_hifiasm_hic/analysis/hprc_DeepPolisher_outputs/mosdepth/Maisie_hic_hifiasm_dip \
+    /private/groups/patenlab/mira/phoenix_batch_executions/workflows/hprc_DeepPolisher/Maisie_hifiasm_hic/analysis/hprc_DeepPolisher_outputs/Maisie_hifiasm_hic.hifi.to.diploid.asm.PHARAOH.bam
+
+cd /private/groups/patenlab/mira/phoenix_batch_executions/workflows/hprc_DeepPolisher/Maisie_hifiasm_hic/analysis/hprc_DeepPolisher_outputs/mosdepth/
+
+zcat Maisie_hic_hifiasm_dip.quantized.bed.gz | awk '{FS=OFS="\t"}{print $0, ($3-$2)}' > Maisie_hic_hifiasm_dip.quantized.tsv
+
+awk 'BEGIN {FS=OFS="\t"} {
+        if ($4 == "0:5") {
+            $4 = "NO_COVERAGE"
+        } else if ($4 == "5:10") {
+            $4 = "LOW_COVERAGE"
+        } else if ($4 == "10:150") {
+            $4 = "CALLABLE"
+        } else if ($4 == "150:inf") {
+            $4 = "HIGH_COVERAGE"
+        }
+        print }' Maisie_hic_hifiasm_dip.quantized.tsv > Maisie_hic_hifiasm_dip.quantized_mapQ1.quant.bed
+
+grep NO_COVERAGE Maisie_hic_hifiasm_dip.quantized_mapQ1.quant.bed > Maisie_hic_hifiasm_dip.quantized_mapQ1.quant.lt5x_cov.bed
+
+awk -v OFS="\t" '{if ($3 -$2 >100) print $1,$2,$3 }' Maisie_hic_hifiasm_dip.quantized_mapQ1.quant.lt5x_cov.bed > Maisie_hic_hifiasm_dip.quantized_mapQ1.quant.lt5x_cov.gt100bp.bed
+
+198633974 / 5844354873 = 3.3 % of genome
 ```
