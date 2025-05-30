@@ -496,3 +496,46 @@ samtools view -s .67 -b -h -@ 32 /private/groups/patenlab/mira/hprc_polishing/ve
 
 samtools index /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/verkko_assembly.20x.bam
 ```
+
+Get bedfile excluding the suspicious regions from the Q100 genome to test training DP with more examples.
+
+Downloaded this file:
+https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/polishing/HG002/v1.1/benchmark/resources/hg002v1.1.resources.tar.gz
+
+Subtract suspicious bed from genome bed
+```sh
+docker run -it -u `id -u`:`id -g` -v /private/groups:/private/groups \
+    pegi3s/bedtools bedtools subtract \
+    -a /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/resources/v1.1.genome.bed \
+    -b /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/resources/v1.1.excluded_regions.bed \
+    > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100v1.1_minus_excluded_regions.genome.bed
+```
+Project bed file to verkko 2.2 assembly coordinates
+```sh
+# Project Q100 confidence bedfile to verkko assembly, each haplotype separately
+# Hap1
+docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+  mobinasri/flagger:latest \
+  python3 /home/programs/src/project_blocks_multi_thread.py \
+  --threads 10 \
+  --mode 'asm2ref' \
+  --paf /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/dipcall_pat/dipcall_outfiles/hg002v1.1_X_EBV_MT.hap1.AP.paf \
+  --blocks /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100v1.1_minus_excluded_regions.genome.bed \
+  --outputProjectable /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.pat.projectable.bed \
+  --outputProjection /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.pat.projection.bed
+
+# Hap 2
+docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+  mobinasri/flagger:latest \
+  python3 /home/programs/src/project_blocks_multi_thread.py \
+  --threads 10 \
+  --mode 'asm2ref' \
+  --paf /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/dipcall_mat/dipcall_outfiles/hg002v1.1_Y_EBV_MT.hap1.AP.paf \
+  --blocks /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100v1.1_minus_excluded_regions.genome.bed \
+  --outputProjectable /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.mat.projectable.bed \
+  --outputProjection /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.mat.projection.bed
+```
+Merge projection beds
+```
+cat /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.mat.projection.bed /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.pat.projection.bed > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.dip.projection.bed
+```
