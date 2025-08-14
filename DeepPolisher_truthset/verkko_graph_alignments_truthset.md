@@ -539,3 +539,70 @@ Merge projection beds
 ```
 cat /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.mat.projection.bed /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.pat.projection.bed > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/Q100_minus_excluded_regions/Q100_wo_excluded_regions_verkko2.2.dip.projection.bed
 ```
+
+### Verkko truthset for updated version on 8/5/2025
+
+### 1. Dipcall verkko assembly against truthset (T2T Q100 v1.1)
+
+Sergey provided the assembly and alignments here: https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=backup/Sergey/HG002/
+
+Separate hap1 and hap2
+Sergey confirmed hap2 = paternal, hap1 = maternal
+```
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025
+
+conda activate seqkit
+cat verkko_assembly.fasta | seqkit grep -r -p '.*haplotype1' > HG002_verkko2.2.haplotype1.maternal.fasta
+cat verkko_assembly.fasta | seqkit grep -r -p '.*haplotype2' > HG002_verkko2.2.haplotype2.paternal.fasta
+```
+Set up input json files
+
+```
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/HG002_verkko2.2.haplotype1.maternal.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/HG002_verkko2.2.haplotype1.maternal.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/truth/hg002v1.1.mat_Y_EBV_MT.copy.fasta",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/truth/hg002v1.1.mat_Y_EBV_MT.fasta",
+  "runDipcall.dipcall.referenceIsHS38": false,
+  "dipcall.isMaleSample":true
+}
+```
+```
+{
+  "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/HG002_verkko2.2.haplotype2.paternal.fasta.fai",
+  "runDipcall.dipcall.referenceFasta": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/HG002_verkko2.2.haplotype2.paternal.fasta",
+  "runDipcall.dipcall.assemblyFastaMat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/truth/hg002v1.1.pat_X_EBV_MT.copy.fasta",
+  "runDipcall.dipcall.assemblyFastaPat": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/truth/hg002v1.1.pat_X_EBV_MT.fasta",
+  "runDipcall.dipcall.referenceIsHS38": false,
+  "dipcall.isMaleSample":true
+}
+```
+
+```
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/dipcall_pat
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/dipcall_mat
+
+export SINGULARITY_CACHEDIR=`pwd`/../cache/.singularity/cache
+export MINIWDL__SINGULARITY__IMAGE_CACHE=`pwd`/../cache/.cache/miniwdl
+export TOIL_SLURM_ARGS="--time=12:00:00 --partition=medium --exclude=phoenix-[09,10,22,23,24,18]"
+export TOIL_COORDINATION_DIR=/data/tmp
+
+mkdir -p toil_logs
+
+time toil-wdl-runner \
+    --jobStore ./jobstore \
+    --stats \
+    --clean=never \
+    --batchSystem slurm \
+    --maxCores 32 \
+    --batchLogsDir ./toil_logs \
+    /private/home/mmastora/progs/hpp_production_workflows/QC/wdl/tasks/dipcall.wdl \
+    dipcall_inputs.json \
+    --outputDirectory ./dipcall_outfiles \
+    --outputFile dipcall_outputs.json \
+    --runLocalJobsOnWorkers \
+    --retryCount 1 \
+    --disableProgress \
+    --logDebug \
+    2>&1 | tee log.txt
+```
