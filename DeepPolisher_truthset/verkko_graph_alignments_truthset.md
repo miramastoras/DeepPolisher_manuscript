@@ -175,7 +175,7 @@ Uploaded for kishwar:
 gsutil -o GSUtil:parallel_composite_upload_threshold=50GB -m cp -r verkko_graph_alignments_Q100v1.1_truthset gs://pepper-deepvariant/mira/
 ```
 
-#### Test on chr 20
+#### Testing on chr 20
 
 ```
 samtools view -bh verkko_assembly.bam haplotype2-0000081 haplotype1-0000017 > verkko_assembly.chr20.bam
@@ -542,19 +542,17 @@ cat /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_gr
 
 ### Verkko truthset for updated version on 8/5/2025
 
-### 1. Dipcall verkko assembly against truthset (T2T Q100 v1.1)
-
 Sergey provided the assembly and alignments here: https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=backup/Sergey/HG002/
 
-Assembly is HiC, so need to rearrange mat and pat contigs
+Assembly is HiC, so Serge provided a mapping of contig to mat or pat : https://s3-us-west-2.amazonaws.com/human-pangenomics/backup/Sergey/HG002/verkko_assemby.trio.bed
 
-https://s3-us-west-2.amazonaws.com/human-pangenomics/backup/Sergey/HG002/verkko_assemby.trio.bed
-
-Removing the contigs with the large switch from both bed files.
+We decided to remove the contigs with the large switch from both bed files.
 ```
 haplotype2-0000075	16	79111402	mat,pat
 haplotype1-0000007	1362	80581086	mat,pat
 ```
+
+##### Remake fasta files with correct maternal and paternal contigs in each.
 ```
 cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025
 
@@ -565,8 +563,9 @@ samtools faidx verkko_assembly.fasta -r verkko_assemby.mat_contigs.txt > HG002_v
 
 samtools faidx verkko_assembly.fasta -r verkko_assemby.pat_contigs.txt > HG002_verkko_08052025.paternal.fasta
 ```
-Set up input json files
+##### Dipcall verkko assembly against truthset (T2T Q100 v1.1)
 
+Setting up input json files:
 ```
 {
   "runDipcall.dipcall.referenceFai": "/private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/HG002_verkko_08052025.maternal.fasta.fai",
@@ -616,7 +615,95 @@ time toil-wdl-runner \
     --logDebug \
     2>&1 | tee log.txt
 ```
-Get bed file of regions with low element mappability:
+
+##### Get bedfile of confidence regions with respect to the verkko assembly coordinates.
+
+
+Downloaded this file from Nancy with latest Q100 issues bed:
+https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/annotation/assemblyissues/hg002v1.1_issues.v3.bb
+
+Convert to bed from bb
+```
+conda activate ucsc
+bigBedToBed hg002v1.1_issues.v3.bb hg002v1.1_issues.v3.bed
 ```
 
+Subtract suspicious bed from genome bed
+```sh
+bedtools subtract \
+    -a /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1/resources/v1.1.genome.bed \
+    -b /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/hg002v1.1_issues.v3.bed \
+    > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/Q100v1.1_minus_issues.v3.genome.bed
+
+bedtools sort -i /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/Q100v1.1_minus_issues.v3.genome.bed | bedtools merge -i - > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/Q100v1.1_minus_issues.v3.genome.srt.bed
+```
+Project bed file to verkko assembly coordinates
+```sh
+
+grep "tp:A:P" /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/dipcall_pat/dipcall_outfiles/hg002v1.1_X_EBV_MT.dipcall/hg002v1.1_X_EBV_MT.hap2.paf > ../HG002_Q100v1.1_verkko_08052025.pat.AP.paf
+grep "tp:A:P" /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/dipcall_mat/dipcall_outfiles/hg002v1.1_Y_EBV_MT.dipcall/hg002v1.1_Y_EBV_MT.hap1.paf > ../HG002_Q100v1.1_verkko_08052025.mat.AP.paf
+
+# Project Q100 confidence bedfile to verkko assembly, each haplotype separately
+# pat
+docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+  mobinasri/flagger:latest \
+  python3 /home/programs/src/project_blocks_multi_thread.py \
+  --threads 10 \
+  --mode 'asm2ref' \
+  --paf /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/dipcall_pat/dipcall_outfiles/HG002_Q100v1.1_verkko_08052025.pat.AP.paf \
+  --blocks /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/Q100v1.1_minus_issues.v3.genome.srt.bed \
+  --outputProjectable /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.pat.projectable.bed \
+  --outputProjection /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.pat.projection.bed
+
+# mat
+docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/groups/patenlab/mira \
+  mobinasri/flagger:latest \
+  python3 /home/programs/src/project_blocks_multi_thread.py \
+  --threads 10 \
+  --mode 'asm2ref' \
+  --paf /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/dipcall_mat/dipcall_outfiles/HG002_Q100v1.1_verkko_08052025.mat.AP.paf \
+  --blocks /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/Q100v1.1_minus_issues.v3.genome.srt.bed \
+  --outputProjectable /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.mat.projectable.bed \
+  --outputProjection /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.mat.projection.bed
+```
+##### Prepare truthset files for Kishwar
+
+Merge projection beds
+```
+cat /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.mat.projection.bed /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.pat.projection.bed > /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.dip.projection.bed
+```
+merge alignment to truth bams:
+```
+samtools merge -o /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/verkko_08052025_truthset_Q100v1.1/HG002_verkko_08052025_Q100_v1.1_dipcall.merged.bam /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/dipcall_pat/dipcall_outfiles/hg002v1.1_X_EBV_MT.dipcall/hg002v1.1_X_EBV_MT.hap1.bam /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/dipcall_mat/dipcall_outfiles/hg002v1.1_Y_EBV_MT.dipcall/hg002v1.1_Y_EBV_MT.hap1.bam
+```
+
+Separate fasta files by chromosome:
+```
+# filter for primary alignments to mat and pat asms
+
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/chrom_maps
+
+samtools view -F0x900 /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/verkko_08052025_truthset_Q100v1.1/HG002_verkko_08052025_Q100_v1.1_dipcall.merged.bam -o /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/chrom_maps/hg002v1.1_Y_EBV_MT.dip.primary.bam
+
+# convert to bed
+bedtools bamtobed -i  /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/chrom_maps/hg002v1.1_Y_EBV_MT.dip.primary.bam >  /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/chrom_maps/hg002v1.1_Y_EBV_MT.dip.primary.bed
+
+awk '{print $4 , $1}' /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/chrom_maps/hg002v1.1_Y_EBV_MT.dip.primary.bed | sort | uniq | wc -l
+
+awk '{print $4 , $1}'  /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/chrom_maps/hg002v1.1_Y_EBV_MT.dip.primary.bed > chrom_maps
+
+# separate fasta into chr 1-19 and chr 20 based on maps
+grep -v "chr21" chrom_maps | grep -v "chr22" | grep -v "chr20" > chrom_maps_1_19
+grep "chr20" chrom_maps > chrom_maps_20
+
+cut -f2 -d " " chrom_maps_1_19 | while read line ; do samtools faidx /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/verkko_assembly.fasta $line >> /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/verkko_08052025_truthset_Q100v1.1/HG002_verkko_08052025_chr1_19.fasta ; done
+
+cut -f2 -d " " chrom_maps_20 | while read line ; do samtools faidx /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/verkko_assembly.fasta $line >> /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/verkko_08052025_truthset_Q100v1.1/HG002_verkko_08052025_chr20.fasta ; done
+```
+
+Uploading truthset for kishwar:
+```
+cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025
+
+gsutil -o GSUtil:parallel_composite_upload_threshold=50GB -m cp -r verkko_08052025_truthset_Q100v1.1 gs://pepper-deepvariant/mira/
 ```
