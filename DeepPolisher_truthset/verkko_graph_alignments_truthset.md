@@ -552,7 +552,7 @@ haplotype2-0000075	16	79111402	mat,pat
 haplotype1-0000007	1362	80581086	mat,pat
 ```
 
-##### Remake fasta files with correct maternal and paternal contigs in each.
+#### Remake fasta files with correct maternal and paternal contigs in each.
 ```
 cd /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025
 
@@ -563,7 +563,7 @@ samtools faidx verkko_assembly.fasta -r verkko_assemby.mat_contigs.txt > HG002_v
 
 samtools faidx verkko_assembly.fasta -r verkko_assemby.pat_contigs.txt > HG002_verkko_08052025.paternal.fasta
 ```
-##### Dipcall verkko assembly against truthset (T2T Q100 v1.1)
+#### Dipcall verkko assembly against truthset (T2T Q100 v1.1)
 
 Setting up input json files:
 ```
@@ -616,7 +616,7 @@ time toil-wdl-runner \
     2>&1 | tee log.txt
 ```
 
-##### Get bedfile of confidence regions with respect to the verkko assembly coordinates.
+#### Get bedfile of confidence regions with respect to the verkko assembly coordinates.
 
 
 Downloaded this file from Nancy with latest Q100 issues bed:
@@ -666,7 +666,7 @@ docker run -it -u `id -u`:`id -g` -v /private/groups/patenlab/mira:/private/grou
   --outputProjectable /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.mat.projectable.bed \
   --outputProjection /private/groups/patenlab/mira/hprc_polishing/verkko_model_truthset/verkko_graph_alignments_Q100v1.1_08052025/Q100_minus_excluded_regions/Q100_minus_issues.v3.verkko_08052025.mat.projection.bed
 ```
-##### Prepare truthset files for Kishwar
+#### Prepare truthset files for Kishwar
 
 Merge projection beds
 ```
